@@ -13,6 +13,7 @@ public class AccountModel {
     private String numberPhone;
     private String password;
     private String name;
+    private String avatar;
     private ArrayList<String> accessTokens = new ArrayList<>();
     private boolean isVerifyNumberPhone = false;
 
@@ -162,5 +163,13 @@ public class AccountModel {
 
     public void setResetPasswordLastTimeResend(long resetPasswordLastTimeResend) {
         this.resetPasswordLastTimeResend = resetPasswordLastTimeResend;
+    }
+
+    public String getAvatar() {
+        return avatar;
+    }
+
+    public void setAvatar(String avatar) {
+        this.avatar = avatar;
     }
 }
