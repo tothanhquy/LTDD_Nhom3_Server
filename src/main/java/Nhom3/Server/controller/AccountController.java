@@ -23,25 +23,25 @@ public class AccountController extends CoreController{
     AccountService accountService;
 
     @PostMapping("/registerStep1")
-    public ResponseAPIModel registerStep1(@RequestBody AccountRequestModel.RegisterStep1 account) {
+    public ResponseAPIModel registerStep1(@RequestParam String numberPhone,@RequestParam String password,@RequestParam String name) {
         try {
-            AccountModel queryAccount = accountService.getByNumberPhone(account.numberPhone);
+            AccountModel queryAccount = accountService.getByNumberPhone(numberPhone);
             if(queryAccount!=null){
                 if(queryAccount.isVerifyNumberPhone()){
                     return new ResponseAPIModel(ResponseAPIModel.Status.Fail,"Số điện thoại đã được đăng ký từ trước.");
                 }else{
                     //resend
-                    SMSAPIService.sendSMS(account.numberPhone);
+                    SMSAPIService.sendSMS(numberPhone);
                 }
             }else{
                 //insert
 //                System.out.println(new Gson().toJson(account));
-                ResponseServiceModel resAction = accountService.register(account.numberPhone,account.password,account.name);
+                ResponseServiceModel resAction = accountService.register(numberPhone,password,name);
                 if(resAction.status==ResponseServiceModel.Status.Fail){
                     return new ResponseAPIModel(ResponseAPIModel.Status.Fail,resAction.error);
                 }else{
                     //send
-                    SMSAPIService.sendSMS(account.numberPhone);
+                    SMSAPIService.sendSMS(numberPhone);
                 }
             }
             return new ResponseAPIModel(ResponseAPIModel.Status.Success,"");
@@ -51,15 +51,15 @@ public class AccountController extends CoreController{
         }
     }
     @PostMapping("/registerStep2")
-    public ResponseAPIModel registerStep2(@RequestBody AccountRequestModel.RegisterStep2 account) {
+    public ResponseAPIModel registerStep2(@RequestParam String numberPhone,@RequestParam String code) {
         try {
-            AccountModel queryAccount = accountService.getByNumberPhone(account.numberPhone);
+            AccountModel queryAccount = accountService.getByNumberPhone(numberPhone);
             if(queryAccount==null) {
                 return new ResponseAPIModel(ResponseAPIModel.Status.Fail,"Số điện thoại chưa được đăng.");
             }else if(queryAccount.isVerifyNumberPhone()){
                 return new ResponseAPIModel(ResponseAPIModel.Status.Fail,"Tài khoản đã được xác minh trước đó.");
             }else{
-                if(!SMSAPIService.verifyCode(account.numberPhone,account.code)){
+                if(!SMSAPIService.verifyCode(numberPhone,code)){
                     return new ResponseAPIModel(ResponseAPIModel.Status.Fail,"OTP sai hoặc đã hết hạn.");
                 }else{
                     ResponseServiceModel resAction = accountService.setVerifyNumberPhone(queryAccount.getId());
@@ -76,13 +76,13 @@ public class AccountController extends CoreController{
         }
     }
     @PostMapping("/login")
-    public ResponseAPIModel login(@RequestBody AccountRequestModel.Login account) {
+    public ResponseAPIModel login(@RequestParam String numberPhone, @RequestParam String password) {
         try {
-            AccountModel queryAccount = accountService.getByNumberPhone(account.numberPhone);
+            AccountModel queryAccount = accountService.getByNumberPhone(numberPhone);
             if(queryAccount==null||!queryAccount.isVerifyNumberPhone()) {
                 return new ResponseAPIModel(ResponseAPIModel.Status.Fail,"Tài khoản không tồn tại.");
             }else{
-                if(!General.verifyPassword(account.password,queryAccount.getPassword())){
+                if(!General.verifyPassword(password,queryAccount.getPassword())){
                     return new ResponseAPIModel(ResponseAPIModel.Status.Fail,"Sai số điện thoại hoặc mật khẩu.");
                 }else{
                     //ok
@@ -107,7 +107,7 @@ public class AccountController extends CoreController{
     }
 
     @PostMapping("/changeName")
-    public ResponseAPIModel changeName(HttpServletRequest request, @RequestBody AccountRequestModel.ChangeName body) {
+    public ResponseAPIModel changeName(HttpServletRequest request, @RequestParam String newName) {
         try {
             AccountService.AccountAuth accountAuth = getAccountAuthFromRequest(request);
             if(accountAuth==null)throw new Exception();
@@ -115,7 +115,7 @@ public class AccountController extends CoreController{
             AccountModel editAccount = accountService.getById(accountAuth.id);
             if(editAccount==null)throw new Exception();
 
-            editAccount.setName(body.newName);
+            editAccount.setName(newName);
             ResponseServiceModel resAction = accountService.update(editAccount);
             if(resAction.status==ResponseServiceModel.Status.Fail){
                 return new ResponseAPIModel(ResponseAPIModel.Status.Fail,resAction.error);
