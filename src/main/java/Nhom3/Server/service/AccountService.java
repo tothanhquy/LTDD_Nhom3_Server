@@ -6,6 +6,7 @@ import Nhom3.Server.repository.AccountRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Optional;
 
 @Service
@@ -23,11 +24,13 @@ public class AccountService {
         public String id;
         public String name;
         public String numberPhone;
+        public String accessToken;
 
-        public AccountAuth(String id, String name, String numberPhone) {
+        public AccountAuth(String id, String name, String numberPhone, String accessToken) {
             this.id = id;
             this.name = name;
             this.numberPhone = numberPhone;
+            this.accessToken = accessToken;
         }
     }
     public static class AccessToken{
@@ -70,22 +73,25 @@ public class AccountService {
             if(jwtParse==null)return null;
 
             AccountModel account = getById(jwtParse.id);
-            if (account!=null) {
-                if(!account.getAccessToken().equals(jwtParse.accessToken)){
-                    return null;
-                }else if(!account.isVerifyNumberPhone()){
-                    return null;
-                }else{
-                    AccessToken accessToken = AccessToken.parse(jwtParse.accessToken);
-                    if(accessToken.time<System.currentTimeMillis()){
-                        //over date
-                        return null;
-                    }else{
-                        return new AccountAuth(account.getId(),account.getName(),account.getNumberPhone());
-                    }
-                }
-            }else{
+            if (account==null) {
                 return null;
+            }
+            if(!account.isVerifyNumberPhone()) {
+                return null;
+            }
+            ArrayList<String> accountAccessTokens = account.getAccessTokens();
+            int ind = accountAccessTokens.indexOf(jwtParse.accessToken);
+            if(ind==-1) {
+                //not match
+                return null;
+            }
+
+            AccessToken accessToken = AccessToken.parse(jwtParse.accessToken);
+            if(accessToken.time<System.currentTimeMillis()){
+                //out date
+                return null;
+            }else{
+                return new AccountAuth(account.getId(),account.getName(),account.getNumberPhone(),jwtParse.accessToken);
             }
         }catch(Exception e){
             System.out.println(e.toString());
@@ -119,7 +125,7 @@ public class AccountService {
             return new ResponseServiceModel<String>(ResponseServiceModel.Status.Fail,"Lỗi hệ thống","");
         }
     }
-    public ResponseServiceModel register(String numberPhone, String password, String name){
+    public ResponseServiceModel register(String numberPhone, String password, String name, long lastTimeResendRegisterCode){
         try {
             if(getByNumberPhone(numberPhone)!=null){
                 return new ResponseServiceModel<String>(ResponseServiceModel.Status.Fail,"Số điện thoại đã được đăng ký từ trước.","");
@@ -134,28 +140,9 @@ public class AccountService {
                 }
                 //hash password
                 String encodedPass = General.hashPassword(password);
-                AccountModel account = new AccountModel(numberPhone,encodedPass,name);
+                AccountModel account = new AccountModel(numberPhone,encodedPass,name,lastTimeResendRegisterCode);
                 accountRepository.save(account);
                 return new ResponseServiceModel<String>(ResponseServiceModel.Status.Success,"","");
-            }
-        }catch(Exception e){
-            return new ResponseServiceModel<String>(ResponseServiceModel.Status.Fail,"Lỗi hệ thống","");
-        }
-    }
-    public ResponseServiceModel setVerifyNumberPhone(String id){
-        try {
-            Optional<AccountModel> optional = accountRepository.findById(id);
-            if (optional.isPresent()) {
-                AccountModel account = optional.get();
-                if(account.isVerifyNumberPhone()){
-                    return new ResponseServiceModel<String>(ResponseServiceModel.Status.Success,"","");
-                }else{
-                    account.setVerifyNumberPhone(true);
-                    accountRepository.save(account);
-                    return new ResponseServiceModel<String>(ResponseServiceModel.Status.Success,"","");
-                }
-            }else{
-                return null;
             }
         }catch(Exception e){
             return new ResponseServiceModel<String>(ResponseServiceModel.Status.Fail,"Lỗi hệ thống","");
