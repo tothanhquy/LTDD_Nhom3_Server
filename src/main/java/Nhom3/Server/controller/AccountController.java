@@ -13,7 +13,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 
 @RestController
@@ -326,5 +329,55 @@ public class AccountController extends CoreController{
         }
     }
 
+    @PostMapping("/editAvatar")
+    public ResponseAPIModel editAvatar(HttpServletRequest request, @RequestParam("avatar") MultipartFile avatar) {
+        try {
+            AccountService.AccountAuth accountAuth = getAccountAuthFromRequest(request);
+            if(accountAuth==null)throw new Exception();
+
+            AccountModel editAccount = accountService.getById(accountAuth.id);
+            if(editAccount==null)throw new Exception();
+
+            if (avatar == null || avatar.isEmpty()) {
+                return new ResponseAPIModel(ResponseAPIModel.Status.Fail,"Bạn phải upload image.");
+            }
+
+            Path directoryPath = ResourceController.USER_AVATAR_PATH;
+
+            if (!avatar.getContentType().startsWith("image/")) {
+                return new ResponseAPIModel(ResponseAPIModel.Status.Fail,"Bạn phải upload image.");
+            }
+
+            if (avatar.getSize() > ResourceController.USER_AVATAR_LIMIT_MB_SIZE * 1024L * 1024) {
+                return new ResponseAPIModel(ResponseAPIModel.Status.Fail,"Ảnh tối đa "+ResourceController.USER_AVATAR_LIMIT_MB_SIZE+" mb.");
+            }
+
+            // Save the file
+            if (!avatar.getOriginalFilename().contains(".")) {
+                throw new Exception();
+            }
+            String fileExtension = avatar.getOriginalFilename().substring(avatar.getOriginalFilename().lastIndexOf(".") + 1);
+            String fileName = accountAuth.id+"."+System.currentTimeMillis()+"."+fileExtension;
+            Files.write(directoryPath.resolve(fileName), avatar.getBytes());
+
+            String oldAvatarName = editAccount.getAvatar();
+            editAccount.setAvatar(fileName);
+
+            ResponseServiceModel resAction = accountService.update(editAccount);
+            if(resAction.status==ResponseServiceModel.Status.Fail){
+                return new ResponseAPIModel(ResponseAPIModel.Status.Fail,resAction.error);
+            }
+
+            //delete old avatar
+            try {
+                Files.deleteIfExists(directoryPath.resolve(oldAvatarName));
+            } catch (Exception e) {}
+
+            return new ResponseAPIModel(ResponseAPIModel.Status.Success,"");
+        } catch (Exception e) {
+            System.out.println(e.toString());
+            return new ResponseAPIModel(ResponseAPIModel.Status.Fail,"Lỗi hệ thống");
+        }
+    }
 
 }
