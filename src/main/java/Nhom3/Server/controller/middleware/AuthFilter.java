@@ -34,8 +34,10 @@ public class AuthFilter implements Filter {
                 path.startsWith("/account/registerStep1")
                 ||path.startsWith("/account/registerStep2")
                 ||path.startsWith("/account/login")
-                ||path.startsWith("/account/resetPassword")
+                ||path.startsWith("/account/resetPasswordStep1")
+                ||path.startsWith("/account/resetPasswordStep2")
                 ||path.startsWith("/resource")
+                ||path.startsWith("/coins")
         ){
             //has not auth
             filterChain.doFilter(request,servletResponse);

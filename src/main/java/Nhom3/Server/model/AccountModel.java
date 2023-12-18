@@ -28,6 +28,14 @@ public class AccountModel {
     private long resetPasswordVerifyBanToTime = 0L;
     private long resetPasswordLastTimeResend = 0L;
 
+    private int tradeAuthOption = 0;//0 is empty | 1 is otp
+    private String pinTrade;
+    private int editTradeAuthVerifyPasswordFailNumber = 0;
+    private long editTradeAuthVerifyPasswordFailLastTime = 0L;
+
+    private int loginVerifyPasswordFailNumber = 0;
+    private long loginVerifyPasswordFailLastTime = 0L;
+
     public AccountModel() {
     }
 
@@ -43,6 +51,54 @@ public class AccountModel {
         this.password = password;
         this.name = name;
         this.registerLastTimeResend = lastTimeResendRegisterCode;
+    }
+
+    public int getLoginVerifyPasswordFailNumber() {
+        return loginVerifyPasswordFailNumber;
+    }
+
+    public void setLoginVerifyPasswordFailNumber(int loginVerifyPasswordFailNumber) {
+        this.loginVerifyPasswordFailNumber = loginVerifyPasswordFailNumber;
+    }
+
+    public long getLoginVerifyPasswordFailLastTime() {
+        return loginVerifyPasswordFailLastTime;
+    }
+
+    public void setLoginVerifyPasswordFailLastTime(long loginVerifyPasswordFailLastTime) {
+        this.loginVerifyPasswordFailLastTime = loginVerifyPasswordFailLastTime;
+    }
+
+    public int getEditTradeAuthVerifyPasswordFailNumber() {
+        return editTradeAuthVerifyPasswordFailNumber;
+    }
+
+    public void setEditTradeAuthVerifyPasswordFailNumber(int editTradeAuthVerifyPasswordFailNumber) {
+        this.editTradeAuthVerifyPasswordFailNumber = editTradeAuthVerifyPasswordFailNumber;
+    }
+
+    public long getEditTradeAuthVerifyPasswordFailLastTime() {
+        return editTradeAuthVerifyPasswordFailLastTime;
+    }
+
+    public void setEditTradeAuthVerifyPasswordFailLastTime(long editTradeAuthVerifyPasswordFailLastTime) {
+        this.editTradeAuthVerifyPasswordFailLastTime = editTradeAuthVerifyPasswordFailLastTime;
+    }
+
+    public int getTradeAuthOption() {
+        return tradeAuthOption;
+    }
+
+    public void setTradeAuthOption(int tradeAuthOption) {
+        this.tradeAuthOption = tradeAuthOption;
+    }
+
+    public String getPinTrade() {
+        return pinTrade;
+    }
+
+    public void setPinTrade(String pinTrade) {
+        this.pinTrade = pinTrade;
     }
 
     public String getId() {

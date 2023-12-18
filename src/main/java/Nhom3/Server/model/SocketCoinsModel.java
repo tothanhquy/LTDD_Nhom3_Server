@@ -1,12 +1,14 @@
 package Nhom3.Server.model;
 
 import java.util.ArrayList;
+import java.util.Locale;
 
 public class SocketCoinsModel {
     public static class Coin{
         public String id;
         public int rank;
         public String symbol;
+        public String icon;
         public String name;
         public float volumeUsd24Hr;
         public float priceUsd;
@@ -16,6 +18,7 @@ public class SocketCoinsModel {
         public Coin(String id, int rank, String symbol, String name, float volumeUsd24Hr, float priceUsd, float changePercent24Hr, float vwap24Hr) {
             this.id = id;
             this.rank = rank;
+            this.icon = "https://assets.coincap.io/assets/icons/"+symbol.toLowerCase()+"@2x.png";
             this.symbol = symbol;
             this.name = name;
             this.volumeUsd24Hr = volumeUsd24Hr;

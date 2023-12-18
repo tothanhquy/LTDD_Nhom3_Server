@@ -37,5 +37,9 @@ public class General {
         String regex = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%?&])[A-Za-z\\d@$!%?&]{8,}$";
         return Pattern.matches(regex, password);
     }
+    public static boolean checkValidPin(String pin){
+        String regex = "^(\\d{4})$";
+        return Pattern.matches(regex, pin);
+    }
     public static String ValidPasswordConstrain = "\\nMật Khẩu:\\nÍt nhất 8 ký tự.\\nChứa ít nhất một chữ hoa và một chữ thường.\\nChứa ít nhất một chữ số và một ký tự đặc biệt.";
 }
