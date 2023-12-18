@@ -25,7 +25,7 @@ public class LoopService implements Runnable{
     public void run(){
         while(true){
             try {
-                    FetchCoinsAPIModel.MainResponse coinsValue = coinAPIService.fetchDataFromApi();
+                    FetchCoinsAPIModel.CoinsNow coinsValue = coinAPIService.getCoinsNow();
                     handleCoinsValue(coinsValue);
                     Thread.sleep(DELAY_TIME_PER_LOOP * 1000);
             } catch (Exception ie) {
@@ -34,7 +34,7 @@ public class LoopService implements Runnable{
         }
 
     }
-    public void handleCoinsValue(FetchCoinsAPIModel.MainResponse coinsValue){
+    public void handleCoinsValue(FetchCoinsAPIModel.CoinsNow coinsValue){
         CoinsValueNow.set(coinsValue);
         //send to socket
         SocketCoinsModel.Coins coins = new SocketCoinsModel.Coins();
