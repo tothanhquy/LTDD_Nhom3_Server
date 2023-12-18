@@ -29,7 +29,10 @@ public class AccountController extends CoreController{
     private final int RESET_PASSWORD_VERIFY_FAIL_MAX_NUMBER = 3;
     private final int RESET_PASSWORD_SEND_CODE_MAX_NUMBER = 3;
     private final int RESET_PASSWORD_VERIFY_FAIL_WAIT_HOUR = 24;
-
+    private final int EDIT_TRACE_AUTH_VERIFY_PASSWORD_FAIL_MAX_NUMBER = 5;
+    private final int EDIT_TRACE_AUTH_VERIFY_PASSWORD_FAIL_WAIT_HOUR = 2;
+    private final int LOGIN_VERIFY_PASSWORD_FAIL_MAX_NUMBER = 5;
+    private final int LOGIN_VERIFY_PASSWORD_FAIL_WAIT_HOUR = 2;
     @Autowired
     AccountService accountService;
 
@@ -122,6 +125,11 @@ public class AccountController extends CoreController{
             if(!SMSAPIService.verifyCode(numberPhone,code)){
                 //verify fail
                 queryAccount.setRegisterVerifyFailNumber(queryAccount.getRegisterVerifyFailNumber()+1);
+                ResponseServiceModel resAction = accountService.update(queryAccount);
+                if(resAction.status==ResponseServiceModel.Status.Fail){
+                    return new ResponseAPIModel(ResponseAPIModel.Status.Fail,resAction.error);
+                }
+                return new ResponseAPIModel(ResponseAPIModel.Status.Fail,"Mã không đúng hoặc đã quá hạn.");
             }else{
                 queryAccount.setVerifyNumberPhone(true);
             }
@@ -130,7 +138,6 @@ public class AccountController extends CoreController{
             if(resAction.status==ResponseServiceModel.Status.Fail){
                 return new ResponseAPIModel(ResponseAPIModel.Status.Fail,resAction.error);
             }
-
             return new ResponseAPIModel(ResponseAPIModel.Status.Success,"");
         } catch (Exception e) {
             System.out.println(e.toString());
@@ -142,29 +149,50 @@ public class AccountController extends CoreController{
         try {
             AccountModel queryAccount = accountService.getByNumberPhone(numberPhone);
             if(queryAccount==null||!queryAccount.isVerifyNumberPhone()) {
-                return new ResponseAPIModel(ResponseAPIModel.Status.Fail,"Tài khoản không tồn tại.");
-            }else{
-                if(!General.verifyPassword(password,queryAccount.getPassword())){
-                    return new ResponseAPIModel(ResponseAPIModel.Status.Fail,"Sai số điện thoại hoặc mật khẩu.");
-                }else{
-                    //ok
-                    AccountService.AccessToken accessToken = AccountService.AccessToken.general(queryAccount.getId());
-
-                    ArrayList<String> accountAccessTokens = queryAccount.getAccessTokens();
-                    accountAccessTokens.add(accessToken.toString());
-                    queryAccount.setAccessTokens(accountAccessTokens);
-
-                    ResponseServiceModel resAction = accountService.update(queryAccount);
-                    if(resAction.status==ResponseServiceModel.Status.Fail){
-                        return new ResponseAPIModel(ResponseAPIModel.Status.Fail,resAction.error);
-                    }
-
-                    AccountService.JWTContent jwtContent = new AccountService.JWTContent(queryAccount.getId(),accessToken.toString());
-                    String jwtResponse = JWTService.register(jwtContent);
-
-                    return new <String>ResponseAPIModel(0,ResponseAPIModel.Status.Success,jwtResponse);
-                }
+                return new ResponseAPIModel(ResponseAPIModel.Status.Fail,"Sai số điện thoại hoặc mật khẩu.");
             }
+            //check fail number
+            if(queryAccount.getLoginVerifyPasswordFailNumber()>=LOGIN_VERIFY_PASSWORD_FAIL_MAX_NUMBER
+            &&queryAccount.getLoginVerifyPasswordFailLastTime()+LOGIN_VERIFY_PASSWORD_FAIL_WAIT_HOUR*60*60*100>System.currentTimeMillis()){
+                //in ban time
+                return new ResponseAPIModel(ResponseAPIModel.Status.Fail,"Không thể thực hiện. Bạn đã sai quá nhiều lần trong thời gian ngắn.");
+            }
+
+            if(queryAccount.getLoginVerifyPasswordFailLastTime()+LOGIN_VERIFY_PASSWORD_FAIL_WAIT_HOUR*60*60*100<System.currentTimeMillis()){
+                //after a long time
+                queryAccount.setLoginVerifyPasswordFailNumber(0);
+            }
+
+            if(!General.verifyPassword(password,queryAccount.getPassword())){
+                queryAccount.setLoginVerifyPasswordFailNumber(queryAccount.getLoginVerifyPasswordFailNumber()+1);
+                queryAccount.setLoginVerifyPasswordFailLastTime(System.currentTimeMillis());
+
+                ResponseServiceModel resAction = accountService.update(queryAccount);
+                if(resAction.status==ResponseServiceModel.Status.Fail){
+                    return new ResponseAPIModel(ResponseAPIModel.Status.Fail,resAction.error);
+                }
+                if(queryAccount.getLoginVerifyPasswordFailNumber()>=LOGIN_VERIFY_PASSWORD_FAIL_MAX_NUMBER){
+                    //fail many time
+                    return new ResponseAPIModel(ResponseAPIModel.Status.Fail,"Sai số điện thoại hoặc mật khẩu. Bạn đã sai quá nhiều lần. Bạn phải đợi "+LOGIN_VERIFY_PASSWORD_FAIL_WAIT_HOUR+" giờ để thực hiện thao tác tiếp theo. ");
+                }
+                return new ResponseAPIModel(ResponseAPIModel.Status.Fail,"Sai số điện thoại hoặc mật khẩu.");
+            }
+            //ok
+            AccountService.AccessToken accessToken = AccountService.AccessToken.general(queryAccount.getId());
+
+            ArrayList<String> accountAccessTokens = queryAccount.getAccessTokens();
+            accountAccessTokens.add(accessToken.toString());
+            queryAccount.setAccessTokens(accountAccessTokens);
+
+            ResponseServiceModel resAction = accountService.update(queryAccount);
+            if(resAction.status==ResponseServiceModel.Status.Fail){
+                return new ResponseAPIModel(ResponseAPIModel.Status.Fail,resAction.error);
+            }
+
+            AccountService.JWTContent jwtContent = new AccountService.JWTContent(queryAccount.getId(),accessToken.toString());
+            String jwtResponse = JWTService.register(jwtContent);
+
+            return new <String>ResponseAPIModel(0,ResponseAPIModel.Status.Success,jwtResponse);
         } catch (Exception e) {
             System.out.println(e.toString());
             return new ResponseAPIModel(ResponseAPIModel.Status.Fail,"Lỗi hệ thống");
@@ -240,6 +268,11 @@ public class AccountController extends CoreController{
             if(!SMSAPIService.verifyCode(numberPhone,code)){
                 //verify fail
                 queryAccount.setResetPasswordVerifyFailNumber(queryAccount.getResetPasswordVerifyFailNumber()+1);
+                ResponseServiceModel resAction = accountService.update(queryAccount);
+                if(resAction.status==ResponseServiceModel.Status.Fail){
+                    return new ResponseAPIModel(ResponseAPIModel.Status.Fail,resAction.error);
+                }
+                return new ResponseAPIModel(ResponseAPIModel.Status.Fail,"Mã không đúng hoặc đã quá hạn.");
             }else{
                 queryAccount.setVerifyNumberPhone(true);
                 queryAccount.setPassword(queryAccount.getPasswordResetting());
@@ -372,6 +405,60 @@ public class AccountController extends CoreController{
             try {
                 Files.deleteIfExists(directoryPath.resolve(oldAvatarName));
             } catch (Exception e) {}
+
+            return new ResponseAPIModel(ResponseAPIModel.Status.Success,"");
+        } catch (Exception e) {
+            System.out.println(e.toString());
+            return new ResponseAPIModel(ResponseAPIModel.Status.Fail,"Lỗi hệ thống");
+        }
+    }
+
+    @PostMapping("/editTradeAuth")
+    public ResponseAPIModel editTradeAuth(HttpServletRequest request, @RequestParam String password, @RequestParam String tradePin) {
+        try {
+            AccountService.AccountAuth accountAuth = getAccountAuthFromRequest(request);
+            if(accountAuth==null)throw new Exception();
+
+            AccountModel editAccount = accountService.getById(accountAuth.id);
+            if(editAccount==null)throw new Exception();
+
+            //check fail number
+            if(editAccount.getEditTradeAuthVerifyPasswordFailNumber()>=EDIT_TRACE_AUTH_VERIFY_PASSWORD_FAIL_MAX_NUMBER
+                    &&editAccount.getEditTradeAuthVerifyPasswordFailLastTime()+EDIT_TRACE_AUTH_VERIFY_PASSWORD_FAIL_WAIT_HOUR*60*60*1000>System.currentTimeMillis()){
+                return new ResponseAPIModel(ResponseAPIModel.Status.Fail,"Không thể thực hiện. Bạn đã sai quá nhiều lần trước đó.");
+            }
+            if(editAccount.getEditTradeAuthVerifyPasswordFailLastTime()+EDIT_TRACE_AUTH_VERIFY_PASSWORD_FAIL_WAIT_HOUR*60*60*1000<System.currentTimeMillis()){
+                //after a long time
+                editAccount.setEditTradeAuthVerifyPasswordFailNumber(0);
+            }
+
+            if(!General.verifyPassword(password,editAccount.getPassword())){
+                editAccount.setEditTradeAuthVerifyPasswordFailNumber(editAccount.getEditTradeAuthVerifyPasswordFailNumber()+1);
+                editAccount.setEditTradeAuthVerifyPasswordFailLastTime(System.currentTimeMillis());
+
+                ResponseServiceModel resAction = accountService.update(editAccount);
+                if(resAction.status==ResponseServiceModel.Status.Fail){
+                    return new ResponseAPIModel(ResponseAPIModel.Status.Fail,resAction.error);
+                }
+                if(editAccount.getEditTradeAuthVerifyPasswordFailNumber()>=EDIT_TRACE_AUTH_VERIFY_PASSWORD_FAIL_MAX_NUMBER){
+                    //fail many time
+                    return new ResponseAPIModel(ResponseAPIModel.Status.Fail,"Xác thực thất bại. Bạn đã sai quá nhiều lần. Bạn phải đợi "+EDIT_TRACE_AUTH_VERIFY_PASSWORD_FAIL_WAIT_HOUR+" giờ để thực hiện thao tác tiếp theo. ");
+                }
+                return new ResponseAPIModel(ResponseAPIModel.Status.Fail,"Xác thực thất bại.");
+            }
+            //ok
+
+            //check valid pin
+            if(!General.checkValidPin(tradePin)){
+                //invalid pin
+                return new ResponseAPIModel(ResponseAPIModel.Status.Fail,"Mã pin không hợp lệ");
+            }
+            editAccount.setPinTrade(tradePin);
+
+            ResponseServiceModel resAction = accountService.update(editAccount);
+            if(resAction.status==ResponseServiceModel.Status.Fail){
+                return new ResponseAPIModel(ResponseAPIModel.Status.Fail,resAction.error);
+            }
 
             return new ResponseAPIModel(ResponseAPIModel.Status.Success,"");
         } catch (Exception e) {
