@@ -36,6 +36,8 @@ public class AccountModel {
     private int loginVerifyPasswordFailNumber = 0;
     private long loginVerifyPasswordFailLastTime = 0L;
 
+    private float moneyNow = 0;
+
     public AccountModel() {
     }
 
@@ -51,6 +53,14 @@ public class AccountModel {
         this.password = password;
         this.name = name;
         this.registerLastTimeResend = lastTimeResendRegisterCode;
+    }
+
+    public float getMoneyNow() {
+        return moneyNow;
+    }
+
+    public void setMoneyNow(float moneyNow) {
+        this.moneyNow = moneyNow;
     }
 
     public int getLoginVerifyPasswordFailNumber() {

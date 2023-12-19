@@ -2,6 +2,9 @@ package Nhom3.Server.service;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
+import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Random;
 import java.util.regex.Pattern;
 
@@ -42,4 +45,21 @@ public class General {
         return Pattern.matches(regex, pin);
     }
     public static String ValidPasswordConstrain = "\\nMật Khẩu:\\nÍt nhất 8 ký tự.\\nChứa ít nhất một chữ hoa và một chữ thường.\\nChứa ít nhất một chữ số và một ký tự đặc biệt.";
+
+    public static String addDotIntoNumber(String numberString) {
+        // Create a DecimalFormat instance
+        DecimalFormat decimalFormat = new DecimalFormat("#,###");
+        // Format the number string with commas
+        String formattedString = decimalFormat.format(Long.parseLong(numberString));
+        return formattedString;
+    }
+    public static String addDotIntoNumber(long milliseconds) {
+        SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy HH:mm");
+        // Format the date
+        return sdf.format(new Date(milliseconds));
+    }
+    public static void mains(String arg[]){
+        System.out.println(addDotIntoNumber(1674950400000L));
+    }
+
 }
