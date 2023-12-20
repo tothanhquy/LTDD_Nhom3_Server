@@ -10,5 +10,11 @@ public class CoinsValueNow{
     public static FetchCoinsAPIModel.CoinsNow get() {
         return _coinsValueNow;
     }
+    public static FetchCoinsAPIModel.CoinNow getCoin(String coinId){
+        for (int i = 0; i < _coinsValueNow.data.size(); i++) {
+            if(_coinsValueNow.data.get(i).id.contains(coinId))return _coinsValueNow.data.get(i);
+        }
+        return null;
+    }
 }
 
