@@ -28,15 +28,28 @@ public class AccountModel {
     private long resetPasswordVerifyBanToTime = 0L;
     private long resetPasswordLastTimeResend = 0L;
 
-    private int tradeAuthOption = 0;//0 is empty | 1 is otp
+    private int tradeAuthOption = 1;//0 is empty | 1 is otp
     private String pinTrade;
+    private int editTradingCommandVerifyPinTradeFailNumber = 0;
+    private long editTradingCommandVerifyPinTradeFailLastTime = 0L;
+    private int editTradingCommandVerifyCodeFailNumber = 0;
+    private long editTradingCommandVerifyCodeFailLastTime = 0L;
+    private long editTradingCommandSendCodeLastTime = 0L;
     private int editTradeAuthVerifyPasswordFailNumber = 0;
     private long editTradeAuthVerifyPasswordFailLastTime = 0L;
 
     private int loginVerifyPasswordFailNumber = 0;
     private long loginVerifyPasswordFailLastTime = 0L;
 
-    private float moneyNow = 0;
+    private float moneyNow = 0F;
+    private float investedMoney = 0F;
+    private float investedMoneyMaximum = 0F;
+    private float investedMoneySum = 0F;
+    private int investedMoneyTimeNumber = 0;
+    private float profitMoneyMaximum = 0F;
+    private float lossMoneyMaximum = 0F;
+
+    private int openTradingCommandNumber = 0;
 
     public AccountModel() {
     }
@@ -53,6 +66,98 @@ public class AccountModel {
         this.password = password;
         this.name = name;
         this.registerLastTimeResend = lastTimeResendRegisterCode;
+    }
+
+    public void compareInvestedMoney(float money){
+        if(money>investedMoneyMaximum){
+            investedMoneyMaximum=money;
+        }
+        investedMoneySum+=money;
+        investedMoneyTimeNumber++;
+    }
+    public void compareProfit(float profit){
+        if(profit>profitMoneyMaximum){
+            profitMoneyMaximum=profit;
+        }
+        if(profit<lossMoneyMaximum){
+            lossMoneyMaximum=profit;
+        }
+    }
+
+    public int getOpenTradingCommandNumber() {
+        return openTradingCommandNumber;
+    }
+
+    public void setOpenTradingCommandNumber(int openTradingCommandNumber) {
+        this.openTradingCommandNumber = openTradingCommandNumber;
+    }
+
+    public float getInvestedMoneyMaximum() {
+        return investedMoneyMaximum;
+    }
+
+    public float getInvestedMoneySum() {
+        return investedMoneySum;
+    }
+
+    public float getInvestedMoneyTimeNumber() {
+        return investedMoneyTimeNumber;
+    }
+
+    public float getProfitMoneyMaximum() {
+        return profitMoneyMaximum;
+    }
+
+    public float getLossMoneyMaximum() {
+        return lossMoneyMaximum;
+    }
+
+    public float getInvestedMoney() {
+        return investedMoney;
+    }
+
+    public void setInvestedMoney(float investedMoney) {
+        this.investedMoney = investedMoney;
+    }
+
+    public long getEditTradingCommandSendCodeLastTime() {
+        return editTradingCommandSendCodeLastTime;
+    }
+
+    public void setEditTradingCommandSendCodeLastTime(long editTradingCommandSendCodeLastTime) {
+        this.editTradingCommandSendCodeLastTime = editTradingCommandSendCodeLastTime;
+    }
+
+    public int getEditTradingCommandVerifyCodeFailNumber() {
+        return editTradingCommandVerifyCodeFailNumber;
+    }
+
+    public void setEditTradingCommandVerifyCodeFailNumber(int editTradingCommandVerifyCodeFailNumber) {
+        this.editTradingCommandVerifyCodeFailNumber = editTradingCommandVerifyCodeFailNumber;
+    }
+
+    public long getEditTradingCommandVerifyCodeFailLastTime() {
+        return editTradingCommandVerifyCodeFailLastTime;
+    }
+
+    public void setEditTradingCommandVerifyCodeFailLastTime(long editTradingCommandVerifyCodeFailLastTime) {
+        this.editTradingCommandVerifyCodeFailLastTime = editTradingCommandVerifyCodeFailLastTime;
+    }
+
+    public int getEditTradingCommandVerifyPinTradeFailNumber() {
+        return editTradingCommandVerifyPinTradeFailNumber;
+    }
+
+    public void setEditTradingCommandVerifyPinTradeFailNumber(int editTradingCommandVerifyPinTradeFailNumber) {
+        this.editTradingCommandVerifyPinTradeFailNumber = editTradingCommandVerifyPinTradeFailNumber;
+    }
+
+    public long getEditTradingCommandVerifyPinTradeFailLastTime() {
+        return editTradingCommandVerifyPinTradeFailLastTime;
+    }
+
+    public void setEditTradingCommandVerifyPinTradeFailLastTime(long editTradingCommandVerifyPinTradeFailLastTime) {
+        this.editTradingCommandVerifyPinTradeFailLastTime = editTradingCommandVerifyPinTradeFailLastTime;
     }
 
     public float getMoneyNow() {

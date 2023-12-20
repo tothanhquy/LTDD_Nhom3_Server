@@ -1,6 +1,7 @@
 package Nhom3.Server.service;
 
 import com.google.gson.Gson;
+import org.springframework.stereotype.Service;
 
 import java.io.*;
 import java.net.ServerSocket;
@@ -9,6 +10,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
+@Service
 public class SocketService implements Runnable{
     private static final int PORT = 8081;
     public static ServerSocket serverSocket;
@@ -288,6 +290,7 @@ public class SocketService implements Runnable{
         }
         public static class Send{
             public static String CoinsPriceNow="coins-price-now";
+            public static String AutoCloseTradingCommand="auto-close-trading-command";
         }
     }
     public static class RoomNamesPrefix{

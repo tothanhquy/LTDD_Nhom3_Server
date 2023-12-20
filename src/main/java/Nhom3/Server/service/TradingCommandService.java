@@ -24,6 +24,12 @@ public class TradingCommandService {
         }).toList());
         return items;
     }
+    public ArrayList<TradingCommandModel> serverGetItems(boolean isOpen){
+        ArrayList<TradingCommandModel> items = new ArrayList<>(tradingCommandRepository.findAll().stream().filter((e)->{
+            return e.isOpen==isOpen;
+        }).toList());
+        return items;
+    }
 
 
     public ResponseServiceModel create(AccountModel author, float coinNumber, float moneyNumber, int leverage, float openPrice, boolean enableTpSl, float takeProfit, float stopLoss, String coinId){

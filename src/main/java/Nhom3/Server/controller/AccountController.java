@@ -3,10 +3,7 @@ package Nhom3.Server.controller;
 import Nhom3.Server.model.AccountModel;
 import Nhom3.Server.model.ResponseAPIModel;
 import Nhom3.Server.model.ResponseServiceModel;
-import Nhom3.Server.service.AccountService;
-import Nhom3.Server.service.General;
-import Nhom3.Server.service.JWTService;
-import Nhom3.Server.service.SMSAPIService;
+import Nhom3.Server.service.*;
 import com.google.gson.Gson;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,8 +30,15 @@ public class AccountController extends CoreController{
     private final int EDIT_TRACE_AUTH_VERIFY_PASSWORD_FAIL_WAIT_HOUR = 2;
     private final int LOGIN_VERIFY_PASSWORD_FAIL_MAX_NUMBER = 5;
     private final int LOGIN_VERIFY_PASSWORD_FAIL_WAIT_HOUR = 2;
+    private final int EDIT_TRADING_COMMAND_VERIFY_PIN_FAIL_MAX_NUMBER = 5;
+    private final int EDIT_TRADING_COMMAND_VERIFY_PIN_FAIL_WAIT_HOUR = 1;
+    private final int EDIT_TRADING_COMMAND_VERIFY_CODE_FAIL_MAX_NUMBER = 3;
+    private final int EDIT_TRADING_COMMAND_VERIFY_CODE_FAIL_WAIT_HOUR = 1;
+    private final float GIVE_MONEY_WHEN_REGISTER = 5000F;
     @Autowired
     AccountService accountService;
+    @Autowired
+    AccountMoneyHistoryService accountMoneyHistoryService;
 
     @PostMapping("/registerStep1")
     public ResponseAPIModel registerStep1(@RequestParam String numberPhone,@RequestParam String password,@RequestParam String name) {
@@ -134,10 +138,17 @@ public class AccountController extends CoreController{
                 queryAccount.setVerifyNumberPhone(true);
             }
 
+            queryAccount.setMoneyNow(queryAccount.getMoneyNow()+GIVE_MONEY_WHEN_REGISTER);
             ResponseServiceModel resAction = accountService.update(queryAccount);
             if(resAction.status==ResponseServiceModel.Status.Fail){
                 return new ResponseAPIModel(ResponseAPIModel.Status.Fail,resAction.error);
             }
+            String moneyHistoryName= "Quà tặng người mới.";
+            resAction = accountMoneyHistoryService.create(queryAccount,moneyHistoryName,GIVE_MONEY_WHEN_REGISTER);
+            if(resAction.status==ResponseServiceModel.Status.Fail){
+                return new ResponseAPIModel(ResponseAPIModel.Status.Fail,resAction.error);
+            }
+
             return new ResponseAPIModel(ResponseAPIModel.Status.Success,"");
         } catch (Exception e) {
             System.out.println(e.toString());
@@ -213,7 +224,7 @@ public class AccountController extends CoreController{
                 queryAccount.setResetPasswordVerifyBanToTime(0L);
                 queryAccount.setResetPasswordSendCodeNumber(0);
             }
-            queryAccount.setResetPasswordSendCodeNumber(queryAccount.getRegisterSendCodeNumber()+1);
+            queryAccount.setResetPasswordSendCodeNumber(queryAccount.getResetPasswordSendCodeNumber()+1);
 
             if(queryAccount.getResetPasswordSendCodeNumber()>RESET_PASSWORD_SEND_CODE_MAX_NUMBER){
                 //over resend time number
@@ -461,6 +472,91 @@ public class AccountController extends CoreController{
             }
 
             return new ResponseAPIModel(ResponseAPIModel.Status.Success,"");
+        } catch (Exception e) {
+            System.out.println(e.toString());
+            return new ResponseAPIModel(ResponseAPIModel.Status.Fail,"Lỗi hệ thống");
+        }
+    }
+
+    //not http
+    public ResponseAPIModel verifyTradingAuthStep1(AccountModel queryAccount, String pin) {
+        try {
+            if(queryAccount.getEditTradingCommandVerifyPinTradeFailLastTime()+EDIT_TRADING_COMMAND_VERIFY_PIN_FAIL_WAIT_HOUR*60*60*1000>System.currentTimeMillis()&&queryAccount.getEditTradingCommandVerifyPinTradeFailNumber()>=EDIT_TRADING_COMMAND_VERIFY_PIN_FAIL_MAX_NUMBER){
+                return new ResponseAPIModel(ResponseAPIModel.Status.Fail,"Không thể thực hiện. Bạn đã sai pin quá nhiều lần trong thời gian ngắn.");
+            }
+            if(queryAccount.getEditTradingCommandVerifyCodeFailLastTime()+EDIT_TRADING_COMMAND_VERIFY_CODE_FAIL_WAIT_HOUR*60*60*1000>System.currentTimeMillis()&&queryAccount.getEditTradingCommandVerifyCodeFailNumber()>=EDIT_TRADING_COMMAND_VERIFY_CODE_FAIL_MAX_NUMBER){
+                return new ResponseAPIModel(ResponseAPIModel.Status.Fail,"Không thể thực hiện. Bạn đã sai quá nhiều lần trong thời gian ngắn.");
+            }
+            if(queryAccount.getEditTradingCommandVerifyPinTradeFailLastTime()+EDIT_TRADING_COMMAND_VERIFY_PIN_FAIL_WAIT_HOUR*60*60*1000<System.currentTimeMillis()){
+                //first time after a long time
+                queryAccount.setEditTradingCommandVerifyPinTradeFailNumber(0);
+            }
+            if(!queryAccount.getPinTrade().equals(pin)){
+                //verify fail
+                queryAccount.setEditTradingCommandVerifyPinTradeFailNumber(queryAccount.getEditTradingCommandVerifyPinTradeFailNumber()+1);
+                ResponseServiceModel resAction = accountService.update(queryAccount);
+                if(resAction.status==ResponseServiceModel.Status.Fail){
+                    return new ResponseAPIModel(ResponseAPIModel.Status.Fail,resAction.error);
+                }
+                if(queryAccount.getEditTradingCommandVerifyPinTradeFailNumber()>EDIT_TRADING_COMMAND_VERIFY_PIN_FAIL_MAX_NUMBER){
+                    return new ResponseAPIModel(ResponseAPIModel.Status.Fail,"Bạn đã sai quá nhiều lần trong thời gian ngắn. Bạn phải đợi "+EDIT_TRADING_COMMAND_VERIFY_PIN_FAIL_WAIT_HOUR+" giờ cho lần gửi tiếp theo.");
+                }
+                return new ResponseAPIModel(ResponseAPIModel.Status.Fail,"Sai mã pin");
+            }else{
+                queryAccount.setEditTradingCommandVerifyPinTradeFailNumber(0);
+                queryAccount.setEditTradingCommandSendCodeLastTime(System.currentTimeMillis());
+                queryAccount.setEditTradingCommandVerifyCodeFailNumber(0);
+
+                SMSAPIService.sendSMS(queryAccount.getNumberPhone());
+
+                ResponseServiceModel resAction = accountService.update(queryAccount);
+                if(resAction.status==ResponseServiceModel.Status.Fail){
+                    return new ResponseAPIModel(ResponseAPIModel.Status.Fail,resAction.error);
+                }
+                return new ResponseAPIModel(ResponseAPIModel.Status.Success,"");
+            }
+        } catch (Exception e) {
+            System.out.println(e.toString());
+            return new ResponseAPIModel(ResponseAPIModel.Status.Fail,"Lỗi hệ thống");
+        }
+    }
+    //not http
+    public ResponseAPIModel verifyTradingAuthStep2(AccountModel queryAccount, String code) {
+        try {
+            if(queryAccount.getEditTradingCommandVerifyCodeFailLastTime()+EDIT_TRADING_COMMAND_VERIFY_CODE_FAIL_WAIT_HOUR*60*60*1000>System.currentTimeMillis()&&queryAccount.getEditTradingCommandVerifyCodeFailNumber()>=EDIT_TRADING_COMMAND_VERIFY_CODE_FAIL_MAX_NUMBER){
+                return new ResponseAPIModel(ResponseAPIModel.Status.Fail,"Không thể thực hiện. Bạn đã sai quá nhiều lần trong thời gian ngắn.");
+            }
+            if(queryAccount.getEditTradingCommandSendCodeLastTime()+VERIFY_CODE_DURATION<System.currentTimeMillis()){
+                //code out of date
+                return new ResponseAPIModel(ResponseAPIModel.Status.Fail,"Mã đã quá hạn.");
+            }
+
+            if(queryAccount.getEditTradingCommandVerifyCodeFailLastTime()+EDIT_TRADING_COMMAND_VERIFY_CODE_FAIL_WAIT_HOUR*60*60*1000<System.currentTimeMillis()){
+                //first time after a long time
+                queryAccount.setEditTradingCommandVerifyCodeFailNumber(0);
+            }
+
+            if(!SMSAPIService.verifyCode(queryAccount.getNumberPhone(),code)){
+                //verify fail
+                queryAccount.setEditTradingCommandVerifyCodeFailLastTime(System.currentTimeMillis());
+                queryAccount.setEditTradingCommandVerifyCodeFailNumber(queryAccount.getEditTradingCommandVerifyCodeFailNumber()+1);
+                ResponseServiceModel resAction = accountService.update(queryAccount);
+                if(resAction.status==ResponseServiceModel.Status.Fail){
+                    return new ResponseAPIModel(ResponseAPIModel.Status.Fail,resAction.error);
+                }
+                if(queryAccount.getEditTradingCommandVerifyCodeFailNumber()>EDIT_TRADING_COMMAND_VERIFY_CODE_FAIL_MAX_NUMBER){
+                    return new ResponseAPIModel(ResponseAPIModel.Status.Fail,"Bạn đã sai quá nhiều lần trong thời gian ngắn. Bạn phải đợi "+EDIT_TRADING_COMMAND_VERIFY_CODE_FAIL_WAIT_HOUR+" giờ cho lần gửi tiếp theo.");
+                }
+                return new ResponseAPIModel(ResponseAPIModel.Status.Fail,"Sai mã OTP");
+            }else{
+                queryAccount.setEditTradingCommandVerifyCodeFailNumber(0);
+
+                ResponseServiceModel resAction = accountService.update(queryAccount);
+                if(resAction.status==ResponseServiceModel.Status.Fail){
+                    return new ResponseAPIModel(ResponseAPIModel.Status.Fail,resAction.error);
+                }
+                return new ResponseAPIModel(ResponseAPIModel.Status.Success,"");
+            }
         } catch (Exception e) {
             System.out.println(e.toString());
             return new ResponseAPIModel(ResponseAPIModel.Status.Fail,"Lỗi hệ thống");

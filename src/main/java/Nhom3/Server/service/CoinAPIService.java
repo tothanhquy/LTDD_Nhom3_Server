@@ -15,10 +15,10 @@ public class CoinAPIService {
     private final String COINS_VALUE_HISTORY_API_URL = "https://api.coincap.io/v2/assets/{{CoinId}}/history?interval={{Interval}}&start={{Start}}&end={{End}}";
 //    private final String COINS_VALUE_HISTORY_API_URL_EXAMPLE = "https://api.coincap.io/v2/assets/bitcoin/history?interval=d1&start=1674950400000&end=1784973000000";
 //    https://assets.coincap.io/assets/icons/btc@2x.png
-    private final RestTemplate restTemplate;
+    private static final RestTemplate restTemplate = new RestTemplate();
 
     public CoinAPIService() {
-        this.restTemplate = new RestTemplate();
+
     }
 
     public FetchCoinsAPIModel.CoinsNow getCoinsNow() {
