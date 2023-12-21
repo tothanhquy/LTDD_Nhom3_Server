@@ -8,10 +8,7 @@ import Nhom3.Server.service.AccountService;
 import Nhom3.Server.service.TradingCommandService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -118,6 +115,8 @@ public class ProfileController extends CoreController {
             resOj.moneyInvested=queryAccount.getInvestedMoney();
             resOj.moneyProfitNow=getProfitNowOfUser(accountAuth.id);
             resOj.openTradingCommandNumber= queryAccount.getOpenTradingCommandNumber();
+            resOj.interestedCoins= queryAccount.getInterestedCoins();
+            if(resOj.interestedCoins==null)resOj.interestedCoins= new ArrayList<>();
 
             ArrayList<TradingCommandModel> openCommands = tradingCommandService.getItems(accountAuth.id,true);
             for (int i = 0; i <openCommands.size(); i++) {
@@ -126,6 +125,43 @@ public class ProfileController extends CoreController {
             }
 
             return new ResponseAPIModel(0,ResponseAPIModel.Status.Success,resOj);
+        }catch (Exception e){
+            System.out.println(e);
+            return new ResponseAPIModel(ResponseAPIModel.Status.Fail,"Lỗi hệ thống");
+        }
+    }
+
+    @PostMapping("/toggleInterestedCoin")
+    public ResponseAPIModel toggleInterestedCoin(HttpServletRequest request, @RequestParam String coinId) {
+        try{
+            AccountService.AccountAuth accountAuth = getAccountAuthFromRequest(request);
+            if(accountAuth==null)throw new Exception();
+
+            FetchCoinsAPIModel.CoinNow coin = CoinsValueNow.getCoin(coinId);
+            if(coin==null){
+                return new ResponseAPIModel(ResponseAPIModel.Status.Fail,"Hiện không hỗ trợ đồng tiền này.");
+            }
+
+            AccountModel queryAccount = accountService.getById(accountAuth.id);
+            if(queryAccount==null){
+                return new ResponseAPIModel(ResponseAPIModel.Status.Fail,"Tài khoản không tồn tại.");
+            }
+            ArrayList<String> interestedCoins = queryAccount.getInterestedCoins();
+            if(interestedCoins==null)interestedCoins=new ArrayList<>();
+            int ind = interestedCoins.indexOf(coinId);
+            if(ind==-1){
+                interestedCoins.add(coinId);
+            }else{
+                interestedCoins.remove(ind);
+            }
+            queryAccount.setInterestedCoins(interestedCoins);
+
+            ResponseServiceModel resAction = accountService.update(queryAccount);
+            if(resAction.status==ResponseServiceModel.Status.Fail){
+                return new ResponseAPIModel(ResponseAPIModel.Status.Fail,resAction.error);
+            }
+
+            return new ResponseAPIModel(0,ResponseAPIModel.Status.Success,"");
         }catch (Exception e){
             System.out.println(e);
             return new ResponseAPIModel(ResponseAPIModel.Status.Fail,"Lỗi hệ thống");

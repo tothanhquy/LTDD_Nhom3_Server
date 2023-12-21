@@ -43,6 +43,7 @@ public class ProfileResponseModel {
         public float moneyProfitNow=0;
         public int openTradingCommandNumber=0;
         public ArrayList<OpenCommandItem> openCommandItems = new ArrayList<>();
+        public ArrayList<String> interestedCoins = new ArrayList<>();
 
         public MiniProfile() {
         }
