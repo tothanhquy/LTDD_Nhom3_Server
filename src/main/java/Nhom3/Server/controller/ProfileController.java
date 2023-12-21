@@ -72,7 +72,7 @@ public class ProfileController extends CoreController {
             AccountService.AccountAuth accountAuth = getAccountAuthFromRequest(request);
             if(accountAuth==null)throw new Exception();
 
-            ArrayList<TopChartUserNow.User> topUsers = TopChartUserNow.getTopUsers(start,end);
+            ArrayList<TopChartUserNow.User> topUsers = TopChartUserNow.getTopUsers(start-1,end-1);
 
             ProfileResponseModel.TopUsers resOj = new ProfileResponseModel.TopUsers();
 
@@ -85,6 +85,7 @@ public class ProfileController extends CoreController {
                     for (int j = 0; j < topUsers.size(); j++) {
                         if(item.getId().equals(topUsers.get(j).id)){
                             topNumber = j + start;
+                            break;
                         }
                     }
                     resOj.items.add(new ProfileResponseModel.TopUser(item.getId(),item.getName(),item.getAvatar(),item.getMoneyNow(),item.getInvestedMoneyTimeNumber(),item.getInvestedMoneyProfitTimeNumber(),topNumber));

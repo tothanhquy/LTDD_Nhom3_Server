@@ -13,6 +13,14 @@ public class TopChartUserNow {
             this.id = id;
             this.moneyNow = moneyNow;
         }
+
+        @Override
+        public String toString() {
+            return "User{" +
+                    "id='" + id + '\'' +
+                    ", moneyNow=" + moneyNow +
+                    '}';
+        }
     }
     private static ArrayList<User> sortedTopUsers=new ArrayList<>();
 
@@ -23,6 +31,9 @@ public class TopChartUserNow {
                 return (int) (b.moneyNow-a.moneyNow);
             }
         });
+//        for (int i = 0; i < sortedTopUsers.size(); i++) {
+//            System.out.println(sortedTopUsers.get(i).toString());
+//        }
     }
     public static void setInit(ArrayList<User> items){
         sortedTopUsers = items;
