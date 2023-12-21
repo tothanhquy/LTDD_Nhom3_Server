@@ -46,6 +46,7 @@ public class AccountModel {
     private float investedMoneyMaximum = 0F;
     private float investedMoneySum = 0F;
     private int investedMoneyTimeNumber = 0;
+    private int investedMoneyProfitTimeNumber = 0;
     private float profitMoneyMaximum = 0F;
     private float lossMoneyMaximum = 0F;
 
@@ -82,6 +83,13 @@ public class AccountModel {
         if(profit<lossMoneyMaximum){
             lossMoneyMaximum=profit;
         }
+        if(profit>0F){
+            investedMoneyProfitTimeNumber++;
+        }
+    }
+
+    public int getInvestedMoneyProfitTimeNumber() {
+        return investedMoneyProfitTimeNumber;
     }
 
     public int getOpenTradingCommandNumber() {
@@ -100,7 +108,7 @@ public class AccountModel {
         return investedMoneySum;
     }
 
-    public float getInvestedMoneyTimeNumber() {
+    public int getInvestedMoneyTimeNumber() {
         return investedMoneyTimeNumber;
     }
 

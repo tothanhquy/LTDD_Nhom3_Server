@@ -3,6 +3,7 @@ package Nhom3.Server.controller;
 import Nhom3.Server.model.AccountModel;
 import Nhom3.Server.model.ResponseAPIModel;
 import Nhom3.Server.model.ResponseServiceModel;
+import Nhom3.Server.model.TopChartUserNow;
 import Nhom3.Server.service.*;
 import com.google.gson.Gson;
 import jakarta.servlet.http.HttpServletRequest;
@@ -148,6 +149,9 @@ public class AccountController extends CoreController{
             if(resAction.status==ResponseServiceModel.Status.Fail){
                 return new ResponseAPIModel(ResponseAPIModel.Status.Fail,resAction.error);
             }
+
+            //update top chart
+            TopChartUserNow.add(new TopChartUserNow.User(queryAccount.getId(),queryAccount.getMoneyNow()));
 
             return new ResponseAPIModel(ResponseAPIModel.Status.Success,"");
         } catch (Exception e) {
@@ -523,6 +527,8 @@ public class AccountController extends CoreController{
     //not http
     public ResponseAPIModel verifyTradingAuthStep2(AccountModel queryAccount, String code) {
         try {
+//            return new ResponseAPIModel(ResponseAPIModel.Status.Success,"");//command to test
+//
             if(queryAccount.getEditTradingCommandVerifyCodeFailLastTime()+EDIT_TRADING_COMMAND_VERIFY_CODE_FAIL_WAIT_HOUR*60*60*1000>System.currentTimeMillis()&&queryAccount.getEditTradingCommandVerifyCodeFailNumber()>=EDIT_TRADING_COMMAND_VERIFY_CODE_FAIL_MAX_NUMBER){
                 return new ResponseAPIModel(ResponseAPIModel.Status.Fail,"Không thể thực hiện. Bạn đã sai quá nhiều lần trong thời gian ngắn.");
             }

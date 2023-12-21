@@ -4,8 +4,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Random;
+import java.util.*;
 import java.util.regex.Pattern;
 
 public class General {
@@ -58,8 +57,11 @@ public class General {
         // Format the date
         return sdf.format(new Date(milliseconds));
     }
-    public static void mains(String arg[]){
-        System.out.println(addDotIntoNumber(1674950400000L));
+
+    public static void main(String arg[]){
+//        System.out.println(addDotIntoNumber(1674950400000L));
+
+
     }
 
 }
