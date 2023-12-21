@@ -51,6 +51,7 @@ public class AccountModel {
     private float lossMoneyMaximum = 0F;
 
     private int openTradingCommandNumber = 0;
+    private ArrayList<String> interestedCoins = new ArrayList<>();
 
     public AccountModel() {
     }
@@ -86,6 +87,14 @@ public class AccountModel {
         if(profit>0F){
             investedMoneyProfitTimeNumber++;
         }
+    }
+
+    public ArrayList<String> getInterestedCoins() {
+        return interestedCoins;
+    }
+
+    public void setInterestedCoins(ArrayList<String> interestedCoins) {
+        this.interestedCoins = interestedCoins;
     }
 
     public int getInvestedMoneyProfitTimeNumber() {
