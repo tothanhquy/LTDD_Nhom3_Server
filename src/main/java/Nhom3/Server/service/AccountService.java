@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -116,6 +117,12 @@ public class AccountService {
         }else{
             return null;
         }
+    }
+    public List<AccountModel> getByIds(List<String> ids){
+        return accountRepository.findAllById(ids);
+    }
+    public List<AccountModel> getAll(){
+        return accountRepository.findAll().stream().filter(e->e.isVerifyNumberPhone()).toList();
     }
     public ResponseServiceModel update(AccountModel accountModel){
         try {

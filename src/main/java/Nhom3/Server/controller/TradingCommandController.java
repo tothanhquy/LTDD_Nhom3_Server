@@ -76,7 +76,7 @@ public class TradingCommandController extends CoreController {
             float openPrice = coin.priceUsd;
             float coinNumber = moneyNumber*leverage/openPrice;
 
-            float commission = openPrice*coinNumber*BASE_COMMISSION;
+            float commission = leverage==1?0L:openPrice*coinNumber*BASE_COMMISSION;
 
             if(enableTpSl&&stopLoss>=moneyNumber-commission){
                 return new ResponseAPIModel(ResponseAPIModel.Status.Fail,"Cắt lỗ phải nhỏ hơn giá trị hiện tại(đã bao gồm hoa hồng).");
@@ -99,6 +99,9 @@ public class TradingCommandController extends CoreController {
             if(resAction.status==ResponseServiceModel.Status.Fail){
                 return new ResponseAPIModel(ResponseAPIModel.Status.Fail,resAction.error);
             }
+
+            //update top chart
+            TopChartUserNow.update(new TopChartUserNow.User(queryAccount.getId(),queryAccount.getMoneyNow()));
 
             TradingCommandResponseModel.Created resOj = new TradingCommandResponseModel.Created(createdId);
             return new ResponseAPIModel(0,ResponseAPIModel.Status.Success,resOj);
@@ -144,7 +147,7 @@ public class TradingCommandController extends CoreController {
                 //check valid value
                 float profitNow = (coin.priceUsd-tradingCommand.openPrice)*tradingCommand.coinNumber;
 
-                float commission = coin.priceUsd*tradingCommand.coinNumber*BASE_COMMISSION;
+                float commission = tradingCommand.leverage==1?0L:coin.priceUsd*tradingCommand.coinNumber*BASE_COMMISSION;
 
                 if(takeProfit<=tradingCommand.moneyNumber+profitNow-commission){
                     return new ResponseAPIModel(ResponseAPIModel.Status.Fail,"Chốt lời không thể thấp hơn giá trị hiện tại(đã bao gồm hoa hồng).");
@@ -240,6 +243,9 @@ public class TradingCommandController extends CoreController {
                 return new ResponseAPIModel(ResponseAPIModel.Status.Fail,resAction.error);
             }
 
+            //update top chart
+            TopChartUserNow.update(new TopChartUserNow.User(queryAccount.getId(),queryAccount.getMoneyNow()));
+
             return new ResponseAPIModel(ResponseAPIModel.Status.Success,"");
         }catch (Exception e){
             System.out.println(e);
@@ -303,6 +309,9 @@ public class TradingCommandController extends CoreController {
 
             SocketService.sendToRoom(SocketService.EventNames.Send.AutoCloseTradingCommand,SocketService.RoomNamesPrefix.PersonalRoom+account.getId(),resJson);
 
+            //update top chart
+            TopChartUserNow.update(new TopChartUserNow.User(account.getId(),account.getMoneyNow()));
+
             return new ResponseAPIModel(ResponseAPIModel.Status.Success,"");
         }catch (Exception e){
             System.out.println(e);
@@ -339,7 +348,7 @@ public class TradingCommandController extends CoreController {
                 FetchCoinsAPIModel.CoinNow coin = CoinsValueNow.getCoin(item.coinId);
                 if(coin==null)continue;
 
-                tradingFee = coin.priceUsd*item.coinNumber*BASE_COMMISSION;
+                tradingFee = item.leverage==1?0L:coin.priceUsd*item.coinNumber*BASE_COMMISSION;
                 profitNow = (coin.priceUsd-item.openPrice)*item.coinNumber;
 
                 if(

@@ -3,6 +3,7 @@ package Nhom3.Server.controller;
 import Nhom3.Server.model.AccountModel;
 import Nhom3.Server.model.ResponseAPIModel;
 import Nhom3.Server.model.ResponseServiceModel;
+import Nhom3.Server.model.TopChartUserNow;
 import Nhom3.Server.service.*;
 import com.google.gson.Gson;
 import jakarta.servlet.http.HttpServletRequest;
@@ -148,6 +149,9 @@ public class AccountController extends CoreController{
             if(resAction.status==ResponseServiceModel.Status.Fail){
                 return new ResponseAPIModel(ResponseAPIModel.Status.Fail,resAction.error);
             }
+
+            //update top chart
+            TopChartUserNow.add(new TopChartUserNow.User(queryAccount.getId(),queryAccount.getMoneyNow()));
 
             return new ResponseAPIModel(ResponseAPIModel.Status.Success,"");
         } catch (Exception e) {
