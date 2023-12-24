@@ -12,6 +12,7 @@ public class TradingCommandModel {
     public String id;
     @DBRef
     public AccountModel author;
+    public String buyOrSell;
 
     public float coinNumber = 0;
     public float moneyNumber = 0;
@@ -30,8 +31,9 @@ public class TradingCommandModel {
 
     public float commission = 0;
 
-    public TradingCommandModel(AccountModel author, float coinNumber, float moneyNumber, int leverage, float openPrice, long openTime, boolean enableTpSl, float takeProfit, float stopLoss, String coinId) {
+    public TradingCommandModel(AccountModel author, String buyOrSell, float coinNumber, float moneyNumber, int leverage, float openPrice, long openTime, boolean enableTpSl, float takeProfit, float stopLoss, String coinId) {
         this.author = author;
+        this.buyOrSell = buyOrSell;
         this.coinNumber = coinNumber;
         this.moneyNumber = moneyNumber;
         this.leverage = leverage;

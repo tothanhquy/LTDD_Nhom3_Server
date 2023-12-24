@@ -29,7 +29,7 @@ public class AccountMoneyHistoryService {
         return items;
     }
     public static String NAME_TEMPLATE = "{{CoinSymbol}}/USD, {{MoneyNumber}}$ x {{Leverage}}, {{OpenDateTime}}";
-    public ResponseServiceModel create(AccountModel account, String name, float money){
+    public ResponseServiceModel create(AccountModel account,String name, float money){
         try {
             AccountMoneyHistoryModel newItem = new AccountMoneyHistoryModel(account, name, System.currentTimeMillis(), money);
             accountMoneyHistoryRepository.save(newItem);

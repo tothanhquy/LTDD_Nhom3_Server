@@ -5,12 +5,14 @@ import java.util.ArrayList;
 public class ProfileResponseModel {
     public static class OpenCommandItem{
         public String id;
+        public String buyOrSell;
         public String coinId;
         public float openPrice;
         public float coinNumber;
 
-        public OpenCommandItem(String id, String coinId, float openPrice, float coinNumber) {
+        public OpenCommandItem(String id,String buyOrSell, String coinId, float openPrice, float coinNumber) {
             this.id = id;
+            this.buyOrSell = buyOrSell;
             this.coinId = coinId;
             this.openPrice = openPrice;
             this.coinNumber = coinNumber;
