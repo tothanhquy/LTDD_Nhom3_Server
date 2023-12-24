@@ -29,7 +29,10 @@ public class TradingCommandController extends CoreController {
 
     private static final float BASE_COMMISSION = 0.0001F;//0.01%
     private static final ArrayList<Integer> LeveragesValid = new ArrayList<>(Arrays.asList(1,5,8,10,13,20));
-
+    private static final class BuyOrSell{
+        public static String Buy = "buy";
+        public static String Sell = "sell";
+    }
     @PostMapping("/verifyPin")
     public ResponseAPIModel verifyPin(HttpServletRequest request, @RequestParam String pin) {
         try{
@@ -46,7 +49,7 @@ public class TradingCommandController extends CoreController {
     }
 
     @PostMapping("/open")
-    public ResponseAPIModel open(HttpServletRequest request, @RequestParam String optCode, @RequestParam String coinId, @RequestParam float moneyNumber, @RequestParam int leverage, @RequestParam boolean enableTpSl, @RequestParam float takeProfit, @RequestParam float stopLoss) {
+    public ResponseAPIModel open(HttpServletRequest request, @RequestParam String optCode, @RequestParam String buyOrSell, @RequestParam String coinId, @RequestParam float moneyNumber, @RequestParam int leverage, @RequestParam boolean enableTpSl, @RequestParam float takeProfit, @RequestParam float stopLoss) {
         try{
             AccountService.AccountAuth accountAuth = getAccountAuthFromRequest(request);
             if(accountAuth==null)throw new Exception();
@@ -67,6 +70,10 @@ public class TradingCommandController extends CoreController {
 
             //check valid leverage
             if(!LeveragesValid.contains(leverage))throw new Exception();
+            //check valid buy or sell
+            if(!buyOrSell.equals(BuyOrSell.Buy)&&!buyOrSell.equals(BuyOrSell.Sell)){
+                throw new Exception();
+            }
 
             //check valid moneyNumber
             if(queryAccount.getMoneyNow()<moneyNumber){
@@ -85,7 +92,7 @@ public class TradingCommandController extends CoreController {
                 return new ResponseAPIModel(ResponseAPIModel.Status.Fail,"Chốt lời phải lớn hơn giá trị hiện tại(đã bao gồm hoa hồng).");
             }
 
-            ResponseServiceModel resAction = tradingCommandService.create(queryAccount, coinNumber, moneyNumber, leverage, openPrice, enableTpSl, takeProfit, stopLoss, coinId);
+            ResponseServiceModel resAction = tradingCommandService.create(queryAccount, buyOrSell, coinNumber, moneyNumber, leverage, openPrice, enableTpSl, takeProfit, stopLoss, coinId);
             if(resAction.status==ResponseServiceModel.Status.Fail){
                 return new ResponseAPIModel(ResponseAPIModel.Status.Fail,resAction.error);
             }
@@ -145,7 +152,8 @@ public class TradingCommandController extends CoreController {
 
             if(enableTpSl){
                 //check valid value
-                float profitNow = (coin.priceUsd-tradingCommand.openPrice)*tradingCommand.coinNumber;
+//                float profitNow = (coin.priceUsd-tradingCommand.openPrice)*tradingCommand.coinNumber;
+                float profitNow = getProfitNow(tradingCommand.buyOrSell,coin.priceUsd,tradingCommand.openPrice,tradingCommand.coinNumber);
 
                 float commission = tradingCommand.leverage==1?0L:coin.priceUsd*tradingCommand.coinNumber*BASE_COMMISSION;
 
@@ -206,7 +214,8 @@ public class TradingCommandController extends CoreController {
                 return new ResponseAPIModel(ResponseAPIModel.Status.Fail,"Hiện không hỗ trợ đồng tiền này.");
             }
 
-            float profitNow = (coin.priceUsd-tradingCommand.openPrice)*tradingCommand.coinNumber;
+//            float profitNow = (coin.priceUsd-tradingCommand.openPrice)*tradingCommand.coinNumber;
+            float profitNow = getProfitNow(tradingCommand.buyOrSell,coin.priceUsd,tradingCommand.openPrice,tradingCommand.coinNumber);
 
             tradingCommand.isOpen=false;
             tradingCommand.closePrice = coin.priceUsd;
@@ -267,7 +276,8 @@ public class TradingCommandController extends CoreController {
                 return new ResponseAPIModel(ResponseAPIModel.Status.Fail,"Hiện không hỗ trợ đồng tiền này.");
             }
 
-            float profitNow = (coin.priceUsd-tradingCommand.openPrice)*tradingCommand.coinNumber;
+//            float profitNow = (coin.priceUsd-tradingCommand.openPrice)*tradingCommand.coinNumber;
+            float profitNow = getProfitNow(tradingCommand.buyOrSell,coin.priceUsd,tradingCommand.openPrice,tradingCommand.coinNumber);
 
             tradingCommand.isOpen=false;
             tradingCommand.closePrice = coin.priceUsd;
@@ -349,8 +359,9 @@ public class TradingCommandController extends CoreController {
                 if(coin==null)continue;
 
                 tradingFee = item.leverage==1?0L:coin.priceUsd*item.coinNumber*BASE_COMMISSION;
-                profitNow = (coin.priceUsd-item.openPrice)*item.coinNumber;
-
+//                profitNow = (coin.priceUsd-item.openPrice)*item.coinNumber;
+                profitNow = getProfitNow(item.buyOrSell,coin.priceUsd,item.openPrice,item.coinNumber);
+                System.out.println("now: "+coin.priceUsd+" open: "+item.openPrice+" profit: "+profitNow);
                 if(
                         (item.enableTpSl&&(
                                 item.moneyNumber+profitNow-tradingFee>item.takeProfit
@@ -421,4 +432,15 @@ public class TradingCommandController extends CoreController {
         }
     }
 
+    //tool / not http
+    public static float getProfitNow(String buyOrSell, float priceNow, float openPrice, float coinNumber){
+        if(buyOrSell.equals(BuyOrSell.Buy)){
+            return (priceNow-openPrice)*coinNumber;
+        }else{
+            return (openPrice-priceNow)*coinNumber;
+        }
+    }
+    private float getCommission(float price, float coinNumber){
+        return price*coinNumber*BASE_COMMISSION;
+    }
 }

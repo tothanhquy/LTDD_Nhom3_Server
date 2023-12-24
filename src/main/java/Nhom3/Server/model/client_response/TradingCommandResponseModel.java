@@ -26,6 +26,7 @@ public class TradingCommandResponseModel {
     }
     public static class OpenTradingCommand{
         public String id;
+        public String buyOrSell;
         public float coinNumber = 0;
         public float moneyNumber = 0;
         public int leverage = 1;
@@ -39,23 +40,9 @@ public class TradingCommandResponseModel {
         public boolean isOpen = true;
         public float commission = 0;
 
-        public OpenTradingCommand(String id, float coinNumber, float moneyNumber, int leverage, float openPrice, long openTime, boolean enableTpSl, float takeProfit, float stopLoss, String coinId, float finalProfit, boolean isOpen, float commission) {
-            this.id = id;
-            this.coinNumber = coinNumber;
-            this.moneyNumber = moneyNumber;
-            this.leverage = leverage;
-            this.openPrice = openPrice;
-            this.openTime = openTime;
-            this.enableTpSl = enableTpSl;
-            this.takeProfit = takeProfit;
-            this.stopLoss = stopLoss;
-            this.coinId = coinId;
-            this.finalProfit = finalProfit;
-            this.isOpen = isOpen;
-            this.commission = commission;
-        }
         public OpenTradingCommand(TradingCommandModel tradingCommandModel) {
             this.id = tradingCommandModel.id;
+            this.buyOrSell = tradingCommandModel.buyOrSell;
             this.coinNumber = tradingCommandModel.coinNumber;
             this.moneyNumber = tradingCommandModel.moneyNumber;
             this.leverage = tradingCommandModel.leverage;
@@ -72,6 +59,7 @@ public class TradingCommandResponseModel {
     }
     public static class CloseTradingCommand{
         public String id;
+        public String buyOrSell;
         public float coinNumber = 0;
         public float moneyNumber = 0;
         public int leverage = 1;
@@ -89,6 +77,7 @@ public class TradingCommandResponseModel {
 
         public CloseTradingCommand(TradingCommandModel tradingCommandModel) {
             this.id = tradingCommandModel.id;
+            this.buyOrSell = tradingCommandModel.buyOrSell;
             this.coinNumber = tradingCommandModel.coinNumber;
             this.moneyNumber = tradingCommandModel.moneyNumber;
             this.leverage = tradingCommandModel.leverage;
@@ -108,6 +97,7 @@ public class TradingCommandResponseModel {
 
     public static class OpenTradingCommandItem{
         public String id;
+        public String buyOrSell;
         public float coinNumber = 0;
         public float moneyNumber = 0;
         public int leverage = 1;
@@ -119,6 +109,7 @@ public class TradingCommandResponseModel {
 
         public OpenTradingCommandItem(TradingCommandModel tradingCommandModel) {
             this.id = tradingCommandModel.id;
+            this.buyOrSell = tradingCommandModel.buyOrSell;
             this.coinNumber = tradingCommandModel.coinNumber;
             this.moneyNumber = tradingCommandModel.moneyNumber;
             this.leverage = tradingCommandModel.leverage;
@@ -137,6 +128,7 @@ public class TradingCommandResponseModel {
     }
     public static class CloseTradingCommandItem{
         public String id;
+        public String buyOrSell;
         public float moneyNumber = 0;
         public int leverage = 1;
         public float openPrice=0;
@@ -147,6 +139,7 @@ public class TradingCommandResponseModel {
 
         public CloseTradingCommandItem(TradingCommandModel tradingCommandModel) {
             this.id = tradingCommandModel.id;
+            this.buyOrSell = tradingCommandModel.buyOrSell;
             this.moneyNumber = tradingCommandModel.moneyNumber;
             this.leverage = tradingCommandModel.leverage;
             this.openPrice = tradingCommandModel.openPrice;

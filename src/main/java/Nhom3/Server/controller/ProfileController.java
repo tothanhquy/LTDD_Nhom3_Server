@@ -22,6 +22,8 @@ public class ProfileController extends CoreController {
     AccountService accountService;
     @Autowired
     TradingCommandService tradingCommandService;
+    @Autowired
+    TradingCommandController tradingCommandController;
     @GetMapping("/details")
     public ResponseAPIModel details(HttpServletRequest request, @RequestParam String userId) {
         try{
@@ -53,7 +55,7 @@ public class ProfileController extends CoreController {
             ArrayList<TradingCommandModel> openCommands = tradingCommandService.getItems(accountAuth.id,true);
             for (int i = 0; i <openCommands.size(); i++) {
                 TradingCommandModel item = openCommands.get(i);
-                resOj.openCommandItems.add(new ProfileResponseModel.OpenCommandItem(item.id, item.coinId, item.openPrice, item.coinNumber));
+                resOj.openCommandItems.add(new ProfileResponseModel.OpenCommandItem(item.id,item.buyOrSell, item.coinId, item.openPrice, item.coinNumber));
             }
 
             return new ResponseAPIModel(0,ResponseAPIModel.Status.Success,resOj);
@@ -121,7 +123,7 @@ public class ProfileController extends CoreController {
             ArrayList<TradingCommandModel> openCommands = tradingCommandService.getItems(accountAuth.id,true);
             for (int i = 0; i <openCommands.size(); i++) {
                 TradingCommandModel item = openCommands.get(i);
-                resOj.openCommandItems.add(new ProfileResponseModel.OpenCommandItem(item.id, item.coinId, item.openPrice, item.coinNumber));
+                resOj.openCommandItems.add(new ProfileResponseModel.OpenCommandItem(item.id,item.buyOrSell, item.coinId, item.openPrice, item.coinNumber));
             }
 
             return new ResponseAPIModel(0,ResponseAPIModel.Status.Success,resOj);
@@ -175,7 +177,7 @@ public class ProfileController extends CoreController {
         for (int i = 0; i < tradingCommands.size(); i++) {
             FetchCoinsAPIModel.CoinNow coin = CoinsValueNow.getCoin(tradingCommands.get(i).coinId);
             if(coin==null)continue;
-            sum+=(float)(coin.priceUsd-tradingCommands.get(i).openPrice)*tradingCommands.get(i).coinNumber;
+            sum+=(float)TradingCommandController.getProfitNow(tradingCommands.get(i).buyOrSell,coin.priceUsd,tradingCommands.get(i).openPrice,tradingCommands.get(i).coinNumber);
         }
         return sum;
     }

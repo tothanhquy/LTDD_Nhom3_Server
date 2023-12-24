@@ -32,9 +32,9 @@ public class TradingCommandService {
     }
 
 
-    public ResponseServiceModel create(AccountModel author, float coinNumber, float moneyNumber, int leverage, float openPrice, boolean enableTpSl, float takeProfit, float stopLoss, String coinId){
+    public ResponseServiceModel create(AccountModel author, String buyOrSell, float coinNumber, float moneyNumber, int leverage, float openPrice, boolean enableTpSl, float takeProfit, float stopLoss, String coinId){
         try {
-            TradingCommandModel newItem = new TradingCommandModel(author, coinNumber, moneyNumber, leverage, openPrice, System.currentTimeMillis() ,enableTpSl, takeProfit, stopLoss, coinId);
+            TradingCommandModel newItem = new TradingCommandModel(author,buyOrSell, coinNumber, moneyNumber, leverage, openPrice, System.currentTimeMillis() ,enableTpSl, takeProfit, stopLoss, coinId);
             String newId = tradingCommandRepository.save(newItem).id;
             return new ResponseServiceModel<String>(ResponseServiceModel.Status.Success,"",newId);
         }catch(Exception e){
