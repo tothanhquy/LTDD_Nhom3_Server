@@ -79,4 +79,14 @@ public class ProfileResponseModel {
         public ArrayList<TopUser> items = new ArrayList<>();
 
     }
+    public static class InterestedCoins{
+        public ArrayList<String> items;
+
+        public InterestedCoins(ArrayList<String> items) {
+            this.items = items;
+        }
+        public InterestedCoins() {
+            this.items = new ArrayList<>();
+        }
+    }
 }
