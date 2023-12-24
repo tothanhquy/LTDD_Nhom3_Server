@@ -133,6 +133,25 @@ public class ProfileController extends CoreController {
         }
     }
 
+    @GetMapping("/interestedCoins")
+    public ResponseAPIModel interestedCoins(HttpServletRequest request) {
+        try{
+            AccountService.AccountAuth accountAuth = getAccountAuthFromRequest(request);
+            if(accountAuth==null)throw new Exception();
+
+            AccountModel queryAccount = accountService.getById(accountAuth.id);
+            if(queryAccount==null){
+                return new ResponseAPIModel(ResponseAPIModel.Status.Fail,"Tài khoản không tồn tại.");
+            }
+
+            ProfileResponseModel.InterestedCoins resOj = new ProfileResponseModel.InterestedCoins(queryAccount.getInterestedCoins());
+
+            return new ResponseAPIModel(0,ResponseAPIModel.Status.Success,resOj);
+        }catch (Exception e){
+            System.out.println(e);
+            return new ResponseAPIModel(ResponseAPIModel.Status.Fail,"Lỗi hệ thống");
+        }
+    }
     @PostMapping("/toggleInterestedCoin")
     public ResponseAPIModel toggleInterestedCoin(HttpServletRequest request, @RequestParam String coinId) {
         try{
