@@ -83,34 +83,28 @@ public class CoinAPIService {
                 endTime = end - (end%H12);
             }
             duringDays = (endTime-startTime)/(1000*60*60*24);
+//            System.out.println(duringDays+":"+maxDays);
 
-            if(duringDays<=maxDays){
-                //not split
-                String url = COINS_VALUE_HISTORY_API_URL.replace("{{CoinId}}",idCoin).replace("{{Interval}}",interval).replace("{{Start}}",startTime+"").replace("{{End}}",endTime+"");
+            FetchCoinsAPIModel.CoinsM1History res = new FetchCoinsAPIModel.CoinsM1History();
+            for (long i = startTime; i < endTime; i+=(long)maxDays*1000*60*60*24) {
+                long urlStart = i;
+                long urlEnd = urlStart+ (long) maxDays*1000*60*60*24-1;
+                if(urlEnd>endTime)urlEnd = endTime;
+//                System.out.println(i+":"+urlStart+":"+urlEnd);
+                String url = COINS_VALUE_HISTORY_API_URL.replace("{{CoinId}}",idCoin).replace("{{Interval}}",interval).replace("{{Start}}",urlStart+"").replace("{{End}}",urlEnd+"");
                 String str = restTemplate.getForObject(url, String.class);
                 FetchCoinsAPIModel.CoinsM1HistoryCrude crude = new Gson().fromJson(str,FetchCoinsAPIModel.CoinsM1HistoryCrude.class);
-                FetchCoinsAPIModel.CoinsM1History res = new FetchCoinsAPIModel.CoinsM1History(crude);
-                return res;
-            }else{
-                //split day
-                FetchCoinsAPIModel.CoinsM1History res = new FetchCoinsAPIModel.CoinsM1History();
-                for (int i = 0; i < duringDays/maxDays; i++) {
-                    long urlStart = startTime+i;
-                    long urlEnd = urlStart+ (long) maxDays *1000*60*60*24;
-                    String url = COINS_VALUE_HISTORY_API_URL.replace("{{CoinId}}",idCoin).replace("{{Interval}}",interval).replace("{{Start}}",urlStart+"").replace("{{End}}",urlEnd+"");
-                    String str = restTemplate.getForObject(url, String.class);
-                    FetchCoinsAPIModel.CoinsM1HistoryCrude crude = new Gson().fromJson(str,FetchCoinsAPIModel.CoinsM1HistoryCrude.class);
-                    FetchCoinsAPIModel.CoinsM1History temp = new FetchCoinsAPIModel.CoinsM1History(crude);
-                    if(!res.data.isEmpty()){
-                        if(res.data.get(res.data.size()-1).time==temp.data.get(0).time){
-                            res.data.remove(res.data.size()-1);
-                        }
+                FetchCoinsAPIModel.CoinsM1History temp = new FetchCoinsAPIModel.CoinsM1History(crude);
+                if(!res.data.isEmpty()){
+                    if(res.data.get(res.data.size()-1).time==temp.data.get(0).time){
+                        res.data.remove(res.data.size()-1);
                     }
-                    res.data.addAll(temp.data);
                 }
-                return res;
+                res.data.addAll(temp.data);
             }
+            return res;
         }catch(Exception e){
+            System.out.println(e);
             return null;
         }
 

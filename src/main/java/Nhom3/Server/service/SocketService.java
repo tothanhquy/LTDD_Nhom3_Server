@@ -232,7 +232,7 @@ public class SocketService implements Runnable{
                     }
                 }
             } catch (IOException e) {
-                e.printStackTrace();
+
             } finally {
                 try {
                     inputStream.close();
@@ -241,7 +241,7 @@ public class SocketService implements Runnable{
                     System.out.println("Client disconnected");
                     clientDisconnect.disconnect(id);
                 } catch (IOException e) {
-                    e.printStackTrace();
+
                 }
             }
         }

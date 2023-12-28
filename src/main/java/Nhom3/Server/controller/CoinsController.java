@@ -89,6 +89,7 @@ public class CoinsController {
             }else{
                 subInterval = CoinAPIService.InternalsValid.get(0);
             }
+            System.out.println(subInterval);
             
             FetchCoinsAPIModel.CoinsM1History chartM1=coinAPIService.getCoinsM1ToH12History(coinId,subInterval,startTime,endTime);
             if(chartM1==null){

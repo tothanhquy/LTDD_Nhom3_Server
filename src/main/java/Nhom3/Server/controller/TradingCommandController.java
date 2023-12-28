@@ -361,7 +361,7 @@ public class TradingCommandController extends CoreController {
                 tradingFee = item.leverage==1?0L:coin.priceUsd*item.coinNumber*BASE_COMMISSION;
 //                profitNow = (coin.priceUsd-item.openPrice)*item.coinNumber;
                 profitNow = getProfitNow(item.buyOrSell,coin.priceUsd,item.openPrice,item.coinNumber);
-                System.out.println("now: "+coin.priceUsd+" open: "+item.openPrice+" profit: "+profitNow);
+//                System.out.println("now: "+coin.priceUsd+" open: "+item.openPrice+" profit: "+profitNow);
                 if(
                         (item.enableTpSl&&(
                                 item.moneyNumber+profitNow-tradingFee>item.takeProfit
