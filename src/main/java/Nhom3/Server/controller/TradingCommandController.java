@@ -83,7 +83,7 @@ public class TradingCommandController extends CoreController {
             float openPrice = coin.priceUsd;
             float coinNumber = moneyNumber*leverage/openPrice;
 
-            float commission = leverage==1?0L:openPrice*coinNumber*BASE_COMMISSION;
+            float commission = leverage==1?0L:getCommission(openPrice,coinNumber,System.currentTimeMillis());
 
             if(enableTpSl&&stopLoss>=moneyNumber-commission){
                 return new ResponseAPIModel(ResponseAPIModel.Status.Fail,"Cắt lỗ phải nhỏ hơn giá trị hiện tại(đã bao gồm hoa hồng).");
@@ -155,7 +155,7 @@ public class TradingCommandController extends CoreController {
 //                float profitNow = (coin.priceUsd-tradingCommand.openPrice)*tradingCommand.coinNumber;
                 float profitNow = getProfitNow(tradingCommand.buyOrSell,coin.priceUsd,tradingCommand.openPrice,tradingCommand.coinNumber);
 
-                float commission = tradingCommand.leverage==1?0L:coin.priceUsd*tradingCommand.coinNumber*BASE_COMMISSION;
+                float commission = tradingCommand.leverage==1?0L:getCommission(tradingCommand.openPrice,tradingCommand.coinNumber,tradingCommand.openTime);
 
                 if(takeProfit<=tradingCommand.moneyNumber+profitNow-commission){
                     return new ResponseAPIModel(ResponseAPIModel.Status.Fail,"Chốt lời không thể thấp hơn giá trị hiện tại(đã bao gồm hoa hồng).");
@@ -224,7 +224,7 @@ public class TradingCommandController extends CoreController {
             if(tradingCommand.leverage==1){
                 tradingCommand.commission=0F;
             }else{
-                tradingCommand.commission = coin.priceUsd*tradingCommand.coinNumber*BASE_COMMISSION;
+                tradingCommand.commission = getCommission(tradingCommand.openPrice,tradingCommand.coinNumber,tradingCommand.openTime);
             }
 
             ResponseServiceModel resAction = tradingCommandService.update(tradingCommand);
@@ -286,7 +286,7 @@ public class TradingCommandController extends CoreController {
             if(tradingCommand.leverage==1){
                 tradingCommand.commission=0F;
             }else{
-                tradingCommand.commission = coin.priceUsd*tradingCommand.coinNumber*BASE_COMMISSION;
+                tradingCommand.commission = getCommission(tradingCommand.openPrice,tradingCommand.coinNumber,tradingCommand.openTime);
             }
 
             ResponseServiceModel resAction = tradingCommandService.update(tradingCommand);
@@ -358,7 +358,7 @@ public class TradingCommandController extends CoreController {
                 FetchCoinsAPIModel.CoinNow coin = CoinsValueNow.getCoin(item.coinId);
                 if(coin==null)continue;
 
-                tradingFee = item.leverage==1?0L:coin.priceUsd*item.coinNumber*BASE_COMMISSION;
+                tradingFee = item.leverage==1?0L:getCommission(item.openPrice,item.coinNumber,item.openTime);
 //                profitNow = (coin.priceUsd-item.openPrice)*item.coinNumber;
                 profitNow = getProfitNow(item.buyOrSell,coin.priceUsd,item.openPrice,item.coinNumber);
 //                System.out.println("now: "+coin.priceUsd+" open: "+item.openPrice+" profit: "+profitNow);
@@ -440,7 +440,8 @@ public class TradingCommandController extends CoreController {
             return (openPrice-priceNow)*coinNumber;
         }
     }
-    private float getCommission(float price, float coinNumber){
-        return price*coinNumber*BASE_COMMISSION;
+    private float getCommission(float openPrice, float coinNumber, long openTime){
+        long days = (System.currentTimeMillis()-openTime)/(1000*60*60*24)+1;
+        return openPrice*coinNumber*BASE_COMMISSION*days;
     }
 }
