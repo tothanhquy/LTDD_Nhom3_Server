@@ -247,7 +247,7 @@ public class SocketService implements Runnable{
         }
         public void send(String messageJson){
             try{
-                System.out.println("send message: "+messageJson);
+//                System.out.println("send message: "+messageJson);
                 outputWriter.println(messageJson);
             }catch(Exception e){
                 System.out.println(e.toString());
