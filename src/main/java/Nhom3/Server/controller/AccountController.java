@@ -482,6 +482,22 @@ public class AccountController extends CoreController{
         }
     }
 
+    @GetMapping("/getTradeAuthStatus")
+    public ResponseAPIModel getTradeAuthStatus(HttpServletRequest request) {
+        try {
+            AccountService.AccountAuth accountAuth = getAccountAuthFromRequest(request);
+            if(accountAuth==null)throw new Exception();
+
+            AccountModel queryAccount = accountService.getById(accountAuth.id);
+            if(queryAccount==null)throw new Exception();
+
+            return new <String>ResponseAPIModel(200,ResponseAPIModel.Status.Success,queryAccount.getPinTrade().isEmpty()?"false":"true");
+        } catch (Exception e) {
+            System.out.println(e.toString());
+            return new ResponseAPIModel(ResponseAPIModel.Status.Fail,"Lỗi hệ thống");
+        }
+    }
+
     //not http
     public ResponseAPIModel verifyTradingAuthStep1(AccountModel queryAccount, String pin) {
         try {
@@ -494,6 +510,9 @@ public class AccountController extends CoreController{
             if(queryAccount.getEditTradingCommandVerifyPinTradeFailLastTime()+EDIT_TRADING_COMMAND_VERIFY_PIN_FAIL_WAIT_HOUR*60*60*1000<System.currentTimeMillis()){
                 //first time after a long time
                 queryAccount.setEditTradingCommandVerifyPinTradeFailNumber(0);
+            }
+            if(queryAccount.getPinTrade().isEmpty()){
+                return new ResponseAPIModel(ResponseAPIModel.Status.Fail,"Không thể thực hiện. Bạn chưa thiết lập mã pin giao dịch.");
             }
             if(!queryAccount.getPinTrade().equals(pin)){
                 //verify fail

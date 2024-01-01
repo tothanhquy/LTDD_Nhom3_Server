@@ -55,7 +55,7 @@ public class ProfileController extends CoreController {
             ArrayList<TradingCommandModel> openCommands = tradingCommandService.getItems(accountAuth.id,true);
             for (int i = 0; i <openCommands.size(); i++) {
                 TradingCommandModel item = openCommands.get(i);
-                resOj.openCommandItems.add(new ProfileResponseModel.OpenCommandItem(item.id,item.buyOrSell, item.coinId, item.openPrice, item.coinNumber));
+                resOj.openCommandItems.add(new ProfileResponseModel.OpenCommandItem(item.id,item.buyOrSell, item.coinId, item.openPrice, item.openTime, item.coinNumber));
             }
 
             return new ResponseAPIModel(0,ResponseAPIModel.Status.Success,resOj);
@@ -123,7 +123,7 @@ public class ProfileController extends CoreController {
             ArrayList<TradingCommandModel> openCommands = tradingCommandService.getItems(accountAuth.id,true);
             for (int i = 0; i <openCommands.size(); i++) {
                 TradingCommandModel item = openCommands.get(i);
-                resOj.openCommandItems.add(new ProfileResponseModel.OpenCommandItem(item.id,item.buyOrSell, item.coinId, item.openPrice, item.coinNumber));
+                resOj.openCommandItems.add(new ProfileResponseModel.OpenCommandItem(item.id,item.buyOrSell, item.coinId, item.openPrice, item.openTime, item.coinNumber));
             }
 
             return new ResponseAPIModel(0,ResponseAPIModel.Status.Success,resOj);

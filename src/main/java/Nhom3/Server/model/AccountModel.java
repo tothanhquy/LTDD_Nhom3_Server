@@ -29,7 +29,7 @@ public class AccountModel {
     private long resetPasswordLastTimeResend = 0L;
 
     private int tradeAuthOption = 1;//0 is empty | 1 is otp
-    private String pinTrade;
+    private String pinTrade="";
     private int editTradingCommandVerifyPinTradeFailNumber = 0;
     private long editTradingCommandVerifyPinTradeFailLastTime = 0L;
     private int editTradingCommandVerifyCodeFailNumber = 0;

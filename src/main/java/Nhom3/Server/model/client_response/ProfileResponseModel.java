@@ -8,13 +8,14 @@ public class ProfileResponseModel {
         public String buyOrSell;
         public String coinId;
         public float openPrice;
+        public long openTime;
         public float coinNumber;
-
-        public OpenCommandItem(String id,String buyOrSell, String coinId, float openPrice, float coinNumber) {
+        public OpenCommandItem(String id, String buyOrSell, String coinId, float openPrice, long openTime, float coinNumber) {
             this.id = id;
             this.buyOrSell = buyOrSell;
             this.coinId = coinId;
             this.openPrice = openPrice;
+            this.openTime = openTime;
             this.coinNumber = coinNumber;
         }
     }
