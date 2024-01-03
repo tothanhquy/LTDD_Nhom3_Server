@@ -1,5 +1,6 @@
 package Nhom3.Server.controller;
 
+import Nhom3.Server.model.CoinsValueNow;
 import Nhom3.Server.model.FetchCoinsAPIModel;
 import Nhom3.Server.model.ResponseAPIModel;
 import Nhom3.Server.model.client_response.CoinResponseModel;
@@ -148,6 +149,17 @@ public class CoinsController {
             }
 
             return new ResponseAPIModel(0,ResponseAPIModel.Status.Success,coinsHistory);
+        }catch (Exception e){
+            System.out.println(e);
+            return new ResponseAPIModel(ResponseAPIModel.Status.Fail,"Lỗi hệ thống");
+        }
+    }
+
+    @GetMapping("/getAll")
+    public ResponseAPIModel getAll() {
+        try{
+            FetchCoinsAPIModel.CoinsNow coinsNow = CoinsValueNow.get();
+            return new ResponseAPIModel(0,ResponseAPIModel.Status.Success,coinsNow);
         }catch (Exception e){
             System.out.println(e);
             return new ResponseAPIModel(ResponseAPIModel.Status.Fail,"Lỗi hệ thống");

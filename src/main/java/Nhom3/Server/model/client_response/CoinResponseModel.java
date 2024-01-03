@@ -45,4 +45,5 @@ public class CoinResponseModel {
         public CoinsHistoryCandleChart() {
         }
     }
+
 }
