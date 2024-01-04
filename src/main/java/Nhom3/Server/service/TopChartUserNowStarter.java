@@ -2,6 +2,7 @@ package Nhom3.Server.service;
 
 import Nhom3.Server.model.AccountModel;
 import Nhom3.Server.model.TopChartUserNow;
+import com.mongodb.client.MongoClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -15,6 +16,8 @@ public class TopChartUserNowStarter implements ApplicationRunner {
 
     @Autowired
     AccountService accountService;
+    @Autowired
+    private MongoClient mongoClient;
 
 //    @Autowired
 //    public TopChartUserNowStarter(LoopService loopService) {
@@ -24,6 +27,12 @@ public class TopChartUserNowStarter implements ApplicationRunner {
     public void run(ApplicationArguments args) {
         // Start a new thread with the LoopService
         System.out.println("TopChartUserNowStarter");
+        try{
+            mongoClient.listDatabases();
+            System.out.println("connect mongodb success");
+        }catch(Exception e){
+            System.out.println("connect mongodb error");
+        }
         new Thread(new Runnable() {
             @Override
             public void run() {
