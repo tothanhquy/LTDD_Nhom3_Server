@@ -24,40 +24,7 @@ public class TradingCommandResponseModel {
             this.id = id;
         }
     }
-    public static class OpenTradingCommand{
-        public String id;
-        public String buyOrSell;
-        public float coinNumber = 0;
-        public float moneyNumber = 0;
-        public int leverage = 1;
-        public float openPrice=0;
-        public long openTime;
-        public boolean enableTpSl = false;
-        public float takeProfit = 0;
-        public float stopLoss = 0;
-        public String coinId;
-        public float finalProfit=0;
-        public boolean isOpen = true;
-        public float commission = 0;
-
-        public OpenTradingCommand(TradingCommandModel tradingCommandModel) {
-            this.id = tradingCommandModel.id;
-            this.buyOrSell = tradingCommandModel.buyOrSell;
-            this.coinNumber = tradingCommandModel.coinNumber;
-            this.moneyNumber = tradingCommandModel.moneyNumber;
-            this.leverage = tradingCommandModel.leverage;
-            this.openPrice = tradingCommandModel.openPrice;
-            this.openTime = tradingCommandModel.openTime;
-            this.enableTpSl = tradingCommandModel.enableTpSl;
-            this.takeProfit = tradingCommandModel.takeProfit;
-            this.stopLoss = tradingCommandModel.stopLoss;
-            this.coinId = tradingCommandModel.coinId;
-            this.finalProfit = tradingCommandModel.finalProfit;
-            this.isOpen = tradingCommandModel.isOpen;
-            this.commission = tradingCommandModel.commission;
-        }
-    }
-    public static class CloseTradingCommand{
+    public static class TradingCommandDetails{
         public String id;
         public String buyOrSell;
         public float coinNumber = 0;
@@ -75,7 +42,7 @@ public class TradingCommandResponseModel {
         public boolean isOpen = true;
         public float commission = 0;
 
-        public CloseTradingCommand(TradingCommandModel tradingCommandModel) {
+        public TradingCommandDetails(TradingCommandModel tradingCommandModel) {
             this.id = tradingCommandModel.id;
             this.buyOrSell = tradingCommandModel.buyOrSell;
             this.coinNumber = tradingCommandModel.coinNumber;

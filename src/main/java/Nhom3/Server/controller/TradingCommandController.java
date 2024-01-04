@@ -49,7 +49,7 @@ public class TradingCommandController extends CoreController {
     }
 
     @PostMapping("/open")
-    public ResponseAPIModel open(HttpServletRequest request, @RequestParam String optCode, @RequestParam String buyOrSell, @RequestParam String coinId, @RequestParam float moneyNumber, @RequestParam int leverage, @RequestParam boolean enableTpSl, @RequestParam float takeProfit, @RequestParam float stopLoss) {
+    public ResponseAPIModel open(HttpServletRequest request, @RequestParam String otpCode, @RequestParam String buyOrSell, @RequestParam String coinId, @RequestParam float moneyNumber, @RequestParam int leverage, @RequestParam boolean enableTpSl, @RequestParam float takeProfit, @RequestParam float stopLoss) {
         try{
             AccountService.AccountAuth accountAuth = getAccountAuthFromRequest(request);
             if(accountAuth==null)throw new Exception();
@@ -57,7 +57,7 @@ public class TradingCommandController extends CoreController {
             if(queryAccount==null)throw new Exception();
 
             //check otp
-            ResponseAPIModel otpResAction = accountController.verifyTradingAuthStep2(queryAccount, optCode);
+            ResponseAPIModel otpResAction = accountController.verifyTradingAuthStep2(queryAccount, otpCode);
             if(otpResAction.status==ResponseAPIModel.Status.Fail){
                 return new ResponseAPIModel(ResponseAPIModel.Status.Fail,otpResAction.error);
             }
@@ -119,7 +119,7 @@ public class TradingCommandController extends CoreController {
     }
 
     @PostMapping("/edit")
-    public ResponseAPIModel edit(HttpServletRequest request, @RequestParam String optCode, @RequestParam String id, @RequestParam boolean enableTpSl, @RequestParam float takeProfit, @RequestParam float stopLoss) {
+    public ResponseAPIModel edit(HttpServletRequest request, @RequestParam String otpCode, @RequestParam String id, @RequestParam boolean enableTpSl, @RequestParam float takeProfit, @RequestParam float stopLoss) {
         try{
             AccountService.AccountAuth accountAuth = getAccountAuthFromRequest(request);
             if(accountAuth==null)throw new Exception();
@@ -127,7 +127,7 @@ public class TradingCommandController extends CoreController {
             if(queryAccount==null)throw new Exception();
 
             //check otp
-            ResponseAPIModel otpResAction = accountController.verifyTradingAuthStep2(queryAccount, optCode);
+            ResponseAPIModel otpResAction = accountController.verifyTradingAuthStep2(queryAccount, otpCode);
             if(otpResAction.status==ResponseAPIModel.Status.Fail){
                 return new ResponseAPIModel(ResponseAPIModel.Status.Fail,otpResAction.error);
             }
@@ -183,7 +183,7 @@ public class TradingCommandController extends CoreController {
     }
 
     @PostMapping("/close")
-    public ResponseAPIModel close(HttpServletRequest request, @RequestParam String optCode, @RequestParam String id) {
+    public ResponseAPIModel close(HttpServletRequest request, @RequestParam String otpCode, @RequestParam String id) {
         try{
             AccountService.AccountAuth accountAuth = getAccountAuthFromRequest(request);
             if(accountAuth==null)throw new Exception();
@@ -191,7 +191,7 @@ public class TradingCommandController extends CoreController {
             if(queryAccount==null)throw new Exception();
 
             //check otp
-            ResponseAPIModel otpResAction = accountController.verifyTradingAuthStep2(queryAccount, optCode);
+            ResponseAPIModel otpResAction = accountController.verifyTradingAuthStep2(queryAccount, otpCode);
             if(otpResAction.status==ResponseAPIModel.Status.Fail){
                 return new ResponseAPIModel(ResponseAPIModel.Status.Fail,otpResAction.error);
             }
@@ -388,13 +388,9 @@ public class TradingCommandController extends CoreController {
                 return new ResponseAPIModel(ResponseAPIModel.Status.Fail,"Bạn không phải chủ của lệnh này.");
             }
 
-            if(tradingCommand.isOpen){
-                TradingCommandResponseModel.OpenTradingCommand resOj = new TradingCommandResponseModel.OpenTradingCommand(tradingCommand);
-                return new ResponseAPIModel(0,ResponseAPIModel.Status.Success,resOj);
-            }else{
-                TradingCommandResponseModel.CloseTradingCommand resOj = new TradingCommandResponseModel.CloseTradingCommand(tradingCommand);
-                return new ResponseAPIModel(0,ResponseAPIModel.Status.Success,resOj);
-            }
+            TradingCommandResponseModel.TradingCommandDetails resOj = new TradingCommandResponseModel.TradingCommandDetails(tradingCommand);
+            return new ResponseAPIModel(0,ResponseAPIModel.Status.Success,resOj);
+
         }catch (Exception e){
             System.out.println(e);
             return new ResponseAPIModel(ResponseAPIModel.Status.Fail,"Lỗi hệ thống");
