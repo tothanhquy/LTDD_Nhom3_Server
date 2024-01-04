@@ -30,7 +30,14 @@ public class ProfileController extends CoreController {
             AccountService.AccountAuth accountAuth = getAccountAuthFromRequest(request);
             if(accountAuth==null)throw new Exception();
 
-            AccountModel queryAccount = accountService.getById(userId);
+            String userIdQuery;
+            if(userId.equals("mine")){
+                userIdQuery = accountAuth.id;
+            }else{
+                userIdQuery = userId;
+            }
+
+            AccountModel queryAccount = accountService.getById(userIdQuery);
             if(queryAccount==null){
                 return new ResponseAPIModel(ResponseAPIModel.Status.Fail,"Tài khoản không tồn tại.");
             }
@@ -42,13 +49,13 @@ public class ProfileController extends CoreController {
             resOj.avatar = queryAccount.getAvatar();
             resOj.moneyNow=queryAccount.getMoneyNow();
             resOj.moneyInvested=queryAccount.getInvestedMoney();
-            resOj.moneyProfitNow=getProfitNowOfUser(userId);
+            resOj.moneyProfitNow=getProfitNowOfUser(userIdQuery);
             resOj.tradingCommandNumber=queryAccount.getInvestedMoneyTimeNumber();
             resOj.tradingCommandProfitNumber=queryAccount.getInvestedMoneyProfitTimeNumber();
-            resOj.topNumber=TopChartUserNow.getIndex(userId)+1;
+            resOj.topNumber=TopChartUserNow.getIndex(userIdQuery)+1;
             resOj.totalNumber=TopChartUserNow.count();
             resOj.tradingCommandMoneyMaximum=queryAccount.getInvestedMoneyMaximum();
-            resOj.tradingCommandMoneyAvg=queryAccount.getInvestedMoneySum()/queryAccount.getInvestedMoneyTimeNumber();
+            resOj.tradingCommandMoneyAvg=queryAccount.getInvestedMoneyTimeNumber()==0?0:queryAccount.getInvestedMoneySum()/queryAccount.getInvestedMoneyTimeNumber();
             resOj.tradingCommandProfitMaximum=queryAccount.getProfitMoneyMaximum();
             resOj.tradingCommandLossMaximum=queryAccount.getLossMoneyMaximum();
 
