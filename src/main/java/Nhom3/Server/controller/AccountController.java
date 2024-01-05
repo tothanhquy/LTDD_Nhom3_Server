@@ -498,6 +498,19 @@ public class AccountController extends CoreController{
         }
     }
 
+    @GetMapping("/checkAuth")
+    public ResponseAPIModel checkAuth(HttpServletRequest request) {
+        try {
+            AccountService.AccountAuth accountAuth = getAccountAuthFromRequest(request);
+            if(accountAuth==null)throw new Exception();
+
+            return new <String>ResponseAPIModel(ResponseAPIModel.Status.Success,"");
+        } catch (Exception e) {
+            System.out.println(e.toString());
+            return new ResponseAPIModel(ResponseAPIModel.Status.Fail,"Lỗi hệ thống");
+        }
+    }
+
     //not http
     public ResponseAPIModel verifyTradingAuthStep1(AccountModel queryAccount, String pin) {
         try {
