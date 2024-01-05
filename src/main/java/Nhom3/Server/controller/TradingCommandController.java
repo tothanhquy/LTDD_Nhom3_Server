@@ -402,6 +402,10 @@ public class TradingCommandController extends CoreController {
             AccountService.AccountAuth accountAuth = getAccountAuthFromRequest(request);
             if(accountAuth==null)throw new Exception();
 
+            if(userId.equals("mine")){
+                userId = accountAuth.id;
+            }
+
             //check permission
             if(!userId.equals(accountAuth.id)&&isOpen){
                 return new ResponseAPIModel(ResponseAPIModel.Status.Fail,"Bạn không phải chủ của các lệnh này.");
