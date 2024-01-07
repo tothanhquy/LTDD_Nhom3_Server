@@ -223,7 +223,7 @@ public class AccountController extends CoreController{
             if(queryAccount.getResetPasswordVerifyBanToTime()>System.currentTimeMillis()){
                 return new ResponseAPIModel(ResponseAPIModel.Status.Fail,"Không thể gửi. Bạn đã gửi quá nhiều lần trong thời gian ngắn.");
             }
-            if(queryAccount.getResetPasswordLastTimeResend()+REGISTER_VERIFY_FAIL_WAIT_HOUR*60*60*1000<System.currentTimeMillis()){
+            if(queryAccount.getResetPasswordLastTimeResend()+RESET_PASSWORD_VERIFY_FAIL_WAIT_HOUR*60*60*1000<System.currentTimeMillis()){
                 //first time after a long time
                 queryAccount.setResetPasswordVerifyBanToTime(0L);
                 queryAccount.setResetPasswordSendCodeNumber(0);
@@ -560,7 +560,7 @@ public class AccountController extends CoreController{
     public ResponseAPIModel verifyTradingAuthStep2(AccountModel queryAccount, String code) {
         try {
 //            return new ResponseAPIModel(ResponseAPIModel.Status.Success,"");//command to test
-////
+
             if(queryAccount.getEditTradingCommandVerifyCodeFailLastTime()+EDIT_TRADING_COMMAND_VERIFY_CODE_FAIL_WAIT_HOUR*60*60*1000>System.currentTimeMillis()&&queryAccount.getEditTradingCommandVerifyCodeFailNumber()>=EDIT_TRADING_COMMAND_VERIFY_CODE_FAIL_MAX_NUMBER){
                 return new ResponseAPIModel(ResponseAPIModel.Status.Fail,"Không thể thực hiện. Bạn đã sai quá nhiều lần trong thời gian ngắn.");
             }
