@@ -79,6 +79,9 @@ public class ProfileController extends CoreController {
             if(accountAuth==null)throw new Exception();
 
             ArrayList<TopChartUserNow.User> topUsers = TopChartUserNow.getTopUsers(start-1,end-1);
+            for (int i = 0; i < topUsers.size(); i++) {
+                System.out.println(topUsers.get(i).moneyNow);
+            }
 
             ProfileResponseModel.TopUsers resOj = new ProfileResponseModel.TopUsers();
 
@@ -96,7 +99,12 @@ public class ProfileController extends CoreController {
                     }
                     resOj.items.add(new ProfileResponseModel.TopUser(item.getId(),item.getName(),item.getAvatar(),item.getMoneyNow(),item.getInvestedMoneyTimeNumber(),item.getInvestedMoneyProfitTimeNumber(),topNumber));
                 }
-
+                resOj.items.sort(new Comparator<ProfileResponseModel.TopUser>() {
+                    @Override
+                    public int compare(ProfileResponseModel.TopUser a, ProfileResponseModel.TopUser b) {
+                        return (int) (b.moneyNow-a.moneyNow);
+                    }
+                });
             }
 
 

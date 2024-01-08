@@ -16,7 +16,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.List;
 
 @RestController
 @RequestMapping("/account")
@@ -25,8 +24,8 @@ public class AccountController extends CoreController{
     private final int REGISTER_SEND_CODE_MAX_NUMBER = 3;
     private final int REGISTER_VERIFY_FAIL_WAIT_HOUR = 3;
     private final int VERIFY_CODE_DURATION = 10*60*1000;//10 minus
-    private final int RESET_PASSWORD_VERIFY_FAIL_MAX_NUMBER = 300;
-    private final int RESET_PASSWORD_SEND_CODE_MAX_NUMBER = 300;
+    private final int RESET_PASSWORD_VERIFY_FAIL_MAX_NUMBER = 3;
+    private final int RESET_PASSWORD_SEND_CODE_MAX_NUMBER = 3;
     private final int RESET_PASSWORD_VERIFY_FAIL_WAIT_HOUR = 24;
     private final int EDIT_TRACE_AUTH_VERIFY_PASSWORD_FAIL_MAX_NUMBER = 5;
     private final int EDIT_TRACE_AUTH_VERIFY_PASSWORD_FAIL_WAIT_HOUR = 2;
@@ -55,7 +54,7 @@ public class AccountController extends CoreController{
                 return new ResponseAPIModel(ResponseAPIModel.Status.Fail,resAction.error);
             }
             //send
-//            SMSAPIService.sendSMS(numberPhone);
+            SMSAPIService.sendSMS(numberPhone);
             return new ResponseAPIModel(ResponseAPIModel.Status.Success,"");
         } catch (Exception e) {
             System.out.println(e.toString());
@@ -83,7 +82,6 @@ public class AccountController extends CoreController{
             queryAccount.setRegisterSendCodeNumber(queryAccount.getRegisterSendCodeNumber()+1);
             if(queryAccount.getRegisterSendCodeNumber()>REGISTER_SEND_CODE_MAX_NUMBER){
                 //over resend time number
-
                 queryAccount.setRegisterVerifyBanToTime(System.currentTimeMillis()+REGISTER_VERIFY_FAIL_WAIT_HOUR*60*60*1000);
             }else{
                 queryAccount.setRegisterLastTimeResend(System.currentTimeMillis());
@@ -99,7 +97,7 @@ public class AccountController extends CoreController{
                 return new ResponseAPIModel(ResponseAPIModel.Status.Fail,"Bạn đã gửi quá nhiều lần trong thời gian ngắn. Bạn phải đợi "+REGISTER_VERIFY_FAIL_WAIT_HOUR+" giờ cho lần gửi tiếp theo.");
             }
             //resend
-//            SMSAPIService.sendSMS(numberPhone);
+            SMSAPIService.sendSMS(numberPhone);
             return new ResponseAPIModel(ResponseAPIModel.Status.Success,"");
         } catch (Exception e) {
             System.out.println(e.toString());
@@ -129,8 +127,7 @@ public class AccountController extends CoreController{
                 return new ResponseAPIModel(ResponseAPIModel.Status.Fail,"Thất bại. Bạn đã dùng quá số lần xác minh.");
             }
 
-//            if(!SMSAPIService.verifyCode(numberPhone,code)){
-            if(!code.equals("123456")){
+            if(!SMSAPIService.verifyCode(numberPhone,code)){
                 //verify fail
                 queryAccount.setRegisterVerifyFailNumber(queryAccount.getRegisterVerifyFailNumber()+1);
                 ResponseServiceModel resAction = accountService.update(queryAccount);
@@ -165,8 +162,6 @@ public class AccountController extends CoreController{
     @PostMapping("/login")
     public ResponseAPIModel login(@RequestParam String numberPhone, @RequestParam String password) {
         try {
-            List<AccountModel> queryAccounts = accountService.getAll();
-            System.out.println(queryAccounts.size());
             AccountModel queryAccount = accountService.getByNumberPhone(numberPhone);
             if(queryAccount==null||!queryAccount.isVerifyNumberPhone()) {
                 return new ResponseAPIModel(ResponseAPIModel.Status.Fail,"Sai số điện thoại hoặc mật khẩu.");
@@ -225,10 +220,10 @@ public class AccountController extends CoreController{
             if(queryAccount==null){
                 return new ResponseAPIModel(ResponseAPIModel.Status.Fail,"Số điện thoại chưa được đăng ký.");
             }
-//            if(queryAccount.getResetPasswordVerifyBanToTime()>System.currentTimeMillis()){
-//                return new ResponseAPIModel(ResponseAPIModel.Status.Fail,"Không thể gửi. Bạn đã gửi quá nhiều lần trong thời gian ngắn.");
-//            }
-            if(queryAccount.getResetPasswordLastTimeResend()+RESET_PASSWORD_VERIFY_FAIL_WAIT_HOUR*60*60*1000<System.currentTimeMillis()){
+            if(queryAccount.getResetPasswordVerifyBanToTime()>System.currentTimeMillis()){
+                return new ResponseAPIModel(ResponseAPIModel.Status.Fail,"Không thể gửi. Bạn đã gửi quá nhiều lần trong thời gian ngắn.");
+            }
+            if(queryAccount.getResetPasswordLastTimeResend()+REGISTER_VERIFY_FAIL_WAIT_HOUR*60*60*1000<System.currentTimeMillis()){
                 //first time after a long time
                 queryAccount.setResetPasswordVerifyBanToTime(0L);
                 queryAccount.setResetPasswordSendCodeNumber(0);
@@ -280,13 +275,12 @@ public class AccountController extends CoreController{
                 return new ResponseAPIModel(ResponseAPIModel.Status.Fail,"Mã đã quá hạn.");
             }
 
-//            if(queryAccount.getResetPasswordVerifyFailNumber()>=RESET_PASSWORD_VERIFY_FAIL_MAX_NUMBER){
-//                //over verify time number
-//                return new ResponseAPIModel(ResponseAPIModel.Status.Fail,"Thất bại. Bạn đã dùng quá số lần xác minh.");
-//            }
+            if(queryAccount.getResetPasswordVerifyFailNumber()>=RESET_PASSWORD_VERIFY_FAIL_MAX_NUMBER){
+                //over verify time number
+                return new ResponseAPIModel(ResponseAPIModel.Status.Fail,"Thất bại. Bạn đã dùng quá số lần xác minh.");
+            }
 
             if(!SMSAPIService.verifyCode(numberPhone,code)){
-//            if(!code.equals("123456")){
                 //verify fail
                 queryAccount.setResetPasswordVerifyFailNumber(queryAccount.getResetPasswordVerifyFailNumber()+1);
                 ResponseServiceModel resAction = accountService.update(queryAccount);
