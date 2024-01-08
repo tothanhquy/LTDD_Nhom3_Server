@@ -1,6 +1,7 @@
 package Nhom3.Server.service;
 
 import com.google.gson.Gson;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
@@ -12,10 +13,13 @@ import java.util.Set;
 
 @Service
 public class SocketService implements Runnable{
+    @Autowired
+    static AccountService accountService;
     private static final int PORT = 8081;
     public static ServerSocket serverSocket;
     private static ArrayList<Client> clients = new ArrayList<>();
     private static ArrayList<Event> events = new ArrayList<>();
+
 
     static {
         try {
@@ -146,7 +150,7 @@ public class SocketService implements Runnable{
 
         if(request.event.equals(EventNames.Receive.JoinPersonalRoom)){
             String jwt = request.content;
-            AccountService.AccountAuth accountAuth = new AccountService().checkAndGetAccountAuth(jwt);
+            AccountService.AccountAuth accountAuth = accountService.checkAndGetAccountAuth(jwt);
             if(accountAuth!=null){
                 int ind = findIndexOfClientById(id);
                 if(ind!=-1){
@@ -159,7 +163,7 @@ public class SocketService implements Runnable{
             }
         }else if(request.event.equals(EventNames.Receive.OutPersonalRoom)){
             String jwt = request.content;
-            AccountService.AccountAuth accountAuth = new AccountService().checkAndGetAccountAuth(jwt);
+            AccountService.AccountAuth accountAuth = accountService.checkAndGetAccountAuth(jwt);
             if(accountAuth!=null){
                 int ind = findIndexOfClientById(id);
                 if(ind!=-1){
