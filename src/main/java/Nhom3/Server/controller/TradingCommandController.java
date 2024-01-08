@@ -27,7 +27,7 @@ public class TradingCommandController extends CoreController {
     @Autowired
     AccountController accountController;
 
-    private static final float BASE_COMMISSION = 0.0001F;//0.01%
+    private static final float BASE_COMMISSION = 0.0005F;//0.05%
     private static final ArrayList<Integer> LeveragesValid = new ArrayList<>(Arrays.asList(1,5,8,10,13,20));
     private static final class BuyOrSell{
         public static String Buy = "buy";
