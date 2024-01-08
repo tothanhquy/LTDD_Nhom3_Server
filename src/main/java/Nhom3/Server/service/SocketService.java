@@ -12,9 +12,9 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Service
-public class SocketService implements Runnable{
+public class SocketService{
     @Autowired
-    static AccountService accountService;
+    public AccountService accountService;
     private static final int PORT = 8081;
     public static ServerSocket serverSocket;
     private static ArrayList<Client> clients = new ArrayList<>();
@@ -30,7 +30,6 @@ public class SocketService implements Runnable{
         }
     }
 
-    @Override
     public void run() {
         try {
             while (true) {
@@ -51,15 +50,19 @@ public class SocketService implements Runnable{
     public static void sendToRoom(String event, String roomName, String content){
         SocketRequestAndResponse response = new SocketRequestAndResponse(event,content);
         String responseContent = new Gson().toJson(response);
+        System.out.println(responseContent);
+        System.out.println(roomName);
         for (int i=0;i<clients.size();i++){
             if(clients.get(i).hasRoom(roomName)){
                 clients.get(i).send(responseContent);
+                System.out.println(roomName);
             }
         }
     }
     public static void sendToAll(String event, String content){
         SocketRequestAndResponse response = new SocketRequestAndResponse(event,content);
         String responseContent = new Gson().toJson(response);
+        System.out.println(responseContent);
         for (int i=0;i<clients.size();i++){
             clients.get(i).send(responseContent);
         }
@@ -105,13 +108,13 @@ public class SocketService implements Runnable{
         }
 
     }
-    public static class ServerReceiveAction implements ServerReceive{
+    public class ServerReceiveAction implements ServerReceive{
         @Override
         public void receive(String id, String message) {
             handelServerReceiveRequest(id,message);
         }
     }
-    public static class ClientDisconnectAction implements ClientDisconnect{
+    public class ClientDisconnectAction implements ClientDisconnect{
         @Override
         public void disconnect(String id) {
             int ind=-1;
@@ -127,7 +130,7 @@ public class SocketService implements Runnable{
         }
     }
 
-    public static void handelServerReceiveRequest(String id, String message){
+    public void handelServerReceiveRequest(String id, String message){
         System.out.println("receive:"+message);
         if(message==null||message.isEmpty())return;
 
@@ -142,9 +145,11 @@ public class SocketService implements Runnable{
             }
             //room
             handelRoomRequest(id,request);
-        }catch(Exception e){}
+        }catch(Exception e){
+            System.out.println(e);
+        }
     }
-    public static void handelRoomRequest(String id, SocketRequestAndResponse request){
+    public void handelRoomRequest(String id, SocketRequestAndResponse request){
         Gson gson = new Gson();
 //        SocketRequestAndResponse request = gson.fromJson(message, SocketRequestAndResponse.class);
 

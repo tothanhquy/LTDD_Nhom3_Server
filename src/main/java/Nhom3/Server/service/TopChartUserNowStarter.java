@@ -17,6 +17,8 @@ public class TopChartUserNowStarter implements ApplicationRunner {
     @Autowired
     AccountService accountService;
     @Autowired
+    SocketService socketService;
+    @Autowired
     private MongoClient mongoClient;
 
 //    @Autowired
@@ -39,6 +41,12 @@ public class TopChartUserNowStarter implements ApplicationRunner {
                 List<AccountModel> items = accountService.getAll();
                 ArrayList<TopChartUserNow.User> topUsers = new ArrayList<>(items.stream().map(e-> new TopChartUserNow.User(e.getId(),e.getMoneyNow())).toList());
                 TopChartUserNow.setInit(topUsers);
+            }
+        }).start();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                socketService.run();
             }
         }).start();
     }

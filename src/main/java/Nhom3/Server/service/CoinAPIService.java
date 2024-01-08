@@ -25,8 +25,7 @@ public class CoinAPIService {
         // Make a GET request to the API
         String str = restTemplate.getForObject(COINS_VALUE_NOW_API_URL, String.class);
         FetchCoinsAPIModel.CoinsNowCrude crude = new Gson().fromJson(str,FetchCoinsAPIModel.CoinsNowCrude.class);
-        FetchCoinsAPIModel parent = new FetchCoinsAPIModel();
-        FetchCoinsAPIModel.CoinsNow res = parent.new CoinsNow(crude);
+        FetchCoinsAPIModel.CoinsNow res = new FetchCoinsAPIModel(). new CoinsNow(crude);
         return res;
     }
 

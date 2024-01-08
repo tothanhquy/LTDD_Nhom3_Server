@@ -23,8 +23,6 @@ public class ServerApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(ServerApplication.class, args);
-		SocketService socketService = new SocketService();
-		new Thread(socketService).start();
 
 //		new Thread(loopService).start();
 //		loopService.start();

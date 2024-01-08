@@ -294,7 +294,7 @@ public class TradingCommandController extends CoreController {
                 return new ResponseAPIModel(ResponseAPIModel.Status.Fail,resAction.error);
             }
 
-            AccountModel account = tradingCommand.author;
+            AccountModel account = accountService.getById(tradingCommand.author.getId());
             account.setMoneyNow(account.getMoneyNow()+profitNow-tradingCommand.commission+tradingCommand.moneyNumber);
             account.setInvestedMoney(account.getInvestedMoney()-tradingCommand.moneyNumber);
             account.compareProfit(profitNow);
